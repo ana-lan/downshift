@@ -6,6 +6,7 @@ from downshift.cli import app
 
 runner = CliRunner()
 COMMANDS = ["scan", "evalgen", "run", "report", "diff", "dashboard"]
+NOT_IMPLEMENTED = ["evalgen", "run", "report", "diff", "dashboard"]
 
 
 def test_help_lists_all_commands() -> None:
@@ -21,7 +22,7 @@ def test_version_flag() -> None:
     assert __version__ in result.output
 
 
-@pytest.mark.parametrize("command", COMMANDS)
+@pytest.mark.parametrize("command", NOT_IMPLEMENTED)
 def test_unimplemented_commands_fail_cleanly(command: str) -> None:
     result = runner.invoke(app, [command])
     assert result.exit_code == 1
