@@ -10,6 +10,7 @@ from rich.table import Table
 from downshift import __version__
 from downshift.audit import Comparison, compare_scans, validate_file
 from downshift.config import ConfigError, resolve_config
+from downshift.evals import EvalReport, check_eval_dir
 from downshift.scanner import scan_path
 from downshift.schema import ScanResult, SchemaError
 
@@ -217,6 +218,61 @@ def _print_comparison(comparison: Comparison, left: str, right: str) -> None:
     for change in comparison.changes:
         changes.add_row(change.id, change.kind, change.detail)
     console.print(changes)
+
+
+# --- check-evals --------------------------------------------------------------
+
+
+@app.command("check-evals")
+def check_evals(
+    directory: Path = typer.Argument(..., help="Folder of <slug>.jsonl eval files."),
+    callsites: Path = typer.Option(
+        ..., "--callsites", help="Audit (or callsites) JSON the eval files belong to."
+    ),
+    strict: bool = typer.Option(False, "--strict", help="Treat warnings as errors."),
+) -> None:
+    """Check eval files against the call sites they test."""
+    if not directory.is_dir():
+        _fail(f"folder not found: {directory}")
+        return
+    try:
+        result = ScanResult.load(callsites)
+    except SchemaError as exc:
+        _fail(str(exc))
+        return
+
+    reports = check_eval_dir(directory, result.call_sites)
+    _print_eval_reports(reports)
+
+    errors = sum(len(r.errors) for r in reports)
+    warnings = sum(len(r.warnings) for r in reports)
+    cases = sum(r.cases for r in reports)
+    files = sum(1 for r in reports if r.path.exists())
+    for r in reports:
+        for message in r.errors:
+            typer.echo(f"error: {r.path.name}: {message}", err=True)
+        for message in r.warnings:
+            typer.echo(f"warning: {r.path.name}: {message}", err=True)
+    typer.echo(f"{files} eval files, {cases} cases, {errors} errors, {warnings} warnings")
+    if errors or (strict and warnings):
+        raise typer.Exit(code=1)
+
+
+def _print_eval_reports(reports: list[EvalReport]) -> None:
+    table = Table(title="Eval sets")
+    table.add_column("Call site", no_wrap=True)
+    table.add_column("Grading")
+    table.add_column("Cases", justify="right")
+    table.add_column("Status")
+    for r in reports:
+        if r.errors:
+            status = f"[red]{len(r.errors)} errors[/red]"
+        elif r.warnings:
+            status = f"[yellow]{len(r.warnings)} warnings[/yellow]"
+        else:
+            status = "[green]ok[/green]"
+        table.add_row(r.site_id or "?", r.grading or "-", str(r.cases), status)
+    Console().print(table)
 
 
 # --- not implemented yet ------------------------------------------------------

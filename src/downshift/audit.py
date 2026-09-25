@@ -13,6 +13,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from downshift.evals import expression_placeholders
 from downshift.schema import CallSite, ScanResult, SchemaError
 
 ENRICHMENT_FIELDS = ("purpose", "output_contract", "difficulty", "grading")
@@ -81,6 +82,11 @@ def lint(result: ScanResult) -> list[str]:
                 warnings.append(f"{site.id}: model still unresolved")
             if not site.prompt_resolved:
                 warnings.append(f"{site.id}: prompt still unresolved")
+            for expression in expression_placeholders(site):
+                warnings.append(
+                    f"{site.id}: placeholder {{{expression}}} is an expression; "
+                    "use a plain name so eval inputs can fill it"
+                )
 
     if from_bob and not any(site.found_by == "bob" for site in result.call_sites):
         warnings.append("generated_by is bob but no call site has found_by bob")
