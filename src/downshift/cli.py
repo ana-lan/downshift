@@ -260,7 +260,7 @@ def check_evals(
 
 def _print_eval_reports(reports: list[EvalReport]) -> None:
     table = Table(title="Eval sets")
-    table.add_column("Call site", no_wrap=True)
+    table.add_column("Call site", overflow="fold")
     table.add_column("Grading")
     table.add_column("Cases", justify="right")
     table.add_column("Status")
