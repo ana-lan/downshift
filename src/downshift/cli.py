@@ -11,10 +11,22 @@ from downshift import __version__
 from downshift.audit import Comparison, compare_scans, validate_file
 from downshift.config import ConfigError, resolve_config
 from downshift.evalgen import EvalGenSkip, generate_eval_set, write_eval_set
-from downshift.evals import EVAL_SUFFIX, EvalReport, check_eval_dir, site_placeholders, slug_for
+from downshift.evals import (
+    EVAL_SUFFIX,
+    EvalError,
+    EvalReport,
+    EvalSet,
+    check_eval_dir,
+    load_eval_set,
+    site_placeholders,
+    slug_for,
+    validate_eval_set,
+)
 from downshift.llm import LLMClient, LLMError, OpenAICompatClient
+from downshift.runner import ResultRow, Runner, RunSummary
 from downshift.scanner import scan_path
-from downshift.schema import ScanResult, SchemaError
+from downshift.schema import CallSite, ScanResult, SchemaError
+from downshift.scorer import Judge
 
 DEFAULT_OUT = Path(".downshift") / "callsites.json"
 
@@ -357,13 +369,142 @@ def evalgen(
         raise typer.Exit(code=1)
 
 
-# --- not implemented yet ------------------------------------------------------
+# --- run ----------------------------------------------------------------------
 
 
 @app.command()
-def run() -> None:
-    """Run evals across candidate models."""
-    _not_implemented("run")
+def run(
+    callsites: Path = typer.Option(..., "--callsites", help="Audit (or callsites) JSON."),
+    evals: Path | None = typer.Option(
+        None, "--evals", help="Eval folder. Default: evals/ next to --callsites."
+    ),
+    out: Path | None = typer.Option(
+        None, "--out", "-o", help="Results folder. Default: results/ next to --callsites."
+    ),
+    model: list[str] = typer.Option(
+        [], "--model", help="Model to run. Repeatable. Default: baseline + candidates."
+    ),
+    site: list[str] = typer.Option([], "--site", help="Only this call site id. Repeatable."),
+    limit: int | None = typer.Option(
+        None, "--limit", min=1, help="Only the first N cases per call site."
+    ),
+    config: Path | None = typer.Option(None, "--config", "-c", help="Config file."),
+    warmup: bool = typer.Option(
+        True, "--warmup/--no-warmup", help="One untimed call per model before timing."
+    ),
+) -> None:
+    """Run each call site's evals on the baseline and candidate models, and score them."""
+    try:
+        result = ScanResult.load(callsites)
+        cfg = resolve_config(config, callsites.parent)
+        client = _make_client(cfg.provider.base_url, cfg.provider.api_key())
+    except (SchemaError, ConfigError) as exc:
+        _fail(str(exc))
+        return
+
+    evals_dir = evals if evals is not None else callsites.parent / "evals"
+    results_dir = out if out is not None else callsites.parent / "results"
+    if not evals_dir.is_dir():
+        _fail(f"folder not found: {evals_dir}")
+        return
+
+    sites = result.call_sites
+    if site:
+        known = {s.id for s in sites}
+        unknown = [s for s in site if s not in known]
+        if unknown:
+            _fail(f"unknown call site id(s): {', '.join(unknown)}")
+            return
+        sites = [s for s in sites if s.id in site]
+
+    tasks = _load_run_tasks(sites, evals_dir)
+    if not tasks:
+        _fail("nothing to run: no call site has a valid eval file")
+        return
+
+    models = model or [cfg.models.baseline, *cfg.models.candidates]
+    runner = Runner(
+        client,
+        results_dir=results_dir,
+        judge=Judge(client, cfg.models.judge_model),
+        limit=limit,
+        warmup=warmup,
+        on_case=_case_mark,
+    )
+    summaries: list[RunSummary] = []
+    failed = False
+    for name in models:
+        for call_site, eval_set in tasks:
+            typer.echo(f"{name}  {call_site.id}  ", nl=False)
+            try:
+                summary = runner.run_site(call_site, eval_set, name)
+            except LLMError as exc:
+                typer.echo("")
+                typer.echo(f"error {name}: {exc}; skipping this model", err=True)
+                failed = True
+                break
+            summaries.append(summary)
+            typer.echo(f"  {summary.passed}/{summary.cases} passed, {summary.new} new")
+
+    _print_run_summary(summaries)
+    errors = sum(s.errors for s in summaries)
+    typer.echo(f"{len(summaries)} site/model runs, {errors} errors. Results in {results_dir}")
+    if failed or errors:
+        raise typer.Exit(code=1)
+
+
+def _load_run_tasks(sites: list[CallSite], evals_dir: Path) -> list[tuple[CallSite, EvalSet]]:
+    tasks: list[tuple[CallSite, EvalSet]] = []
+    for call_site in sites:
+        path = evals_dir / f"{slug_for(call_site.id)}{EVAL_SUFFIX}"
+        if not path.is_file():
+            typer.echo(f"skip {call_site.id}: no eval file at {path}")
+            continue
+        try:
+            eval_set = load_eval_set(path)
+        except EvalError as exc:
+            typer.echo(f"skip {call_site.id}: {exc}")
+            continue
+        report = validate_eval_set(eval_set, call_site)
+        if report.errors:
+            typer.echo(
+                f"skip {call_site.id}: {len(report.errors)} eval errors (run downshift check-evals)"
+            )
+            continue
+        tasks.append((call_site, eval_set))
+    return tasks
+
+
+def _case_mark(row: ResultRow) -> None:
+    mark = "E" if row.error else ("." if row.passed else "x")
+    typer.echo(mark, nl=False)
+
+
+def _print_run_summary(summaries: list[RunSummary]) -> None:
+    table = Table(title="Run results")
+    table.add_column("Call site", overflow="fold")
+    table.add_column("Model", no_wrap=True)
+    table.add_column("Cases", justify="right")
+    table.add_column("Passed", justify="right")
+    table.add_column("Score", justify="right")
+    table.add_column("Latency", justify="right")
+    table.add_column("Tokens in/out", justify="right")
+    table.add_column("Errors", justify="right")
+    for s in summaries:
+        rate = f"{s.passed}/{s.scored} ({s.pass_rate:.0%})" if s.pass_rate is not None else "-"
+        score = f"{s.mean_score:.2f}" if s.mean_score is not None else "-"
+        latency = f"{s.avg_latency_s:.2f}s" if s.avg_latency_s is not None else "-"
+        tokens = (
+            f"{s.avg_prompt_tokens:.0f}/{s.avg_completion_tokens:.0f}"
+            if s.avg_prompt_tokens is not None and s.avg_completion_tokens is not None
+            else "-"
+        )
+        errors = f"[red]{s.errors}[/red]" if s.errors else "0"
+        table.add_row(s.site_id, s.model, str(s.cases), rate, score, latency, tokens, errors)
+    Console().print(table)
+
+
+# --- not implemented yet ------------------------------------------------------
 
 
 @app.command()
