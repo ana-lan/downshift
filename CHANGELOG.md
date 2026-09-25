@@ -8,3 +8,7 @@ and this project uses [Semantic Versioning](https://semver.org/).
 
 ### Added
 - Project scaffold: CLI stub, tooling, CI.
+- `examples/supportdesk`: demo target app with 8 LLM call sites, 40 synthetic tickets, and a refund policy document.
+
+### Changed
+- CI: bump `actions/checkout` to v5 and `actions/setup-python` to v6 (Node 24).
