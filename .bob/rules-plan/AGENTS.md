@@ -8,6 +8,6 @@
 - **Caller attribution is name-based**: `_attach_callers` matches function names as strings.
 - **`ScanResult.write()` overwrites silently**: no merging, no locking.
 - **`via`** is not set by the AST scanner. The Bob auditor sets it when it splits a shared helper (e.g. `supportdesk/llm.py::ask`) into one logical call site per feature; `via` holds the helper's call site id.
-- **Bob auditor output is a separate file**, e.g. `examples/supportdesk/downshift.audit.json`. It never overwrites the scanner's `.downshift/callsites.json`; `downshift compare` reads both.
-- **`bob/` holds shipped mode and skill definitions**, not audit output.
+- **Bob auditor output is a separate file**, e.g. `examples/supportdesk/downshift.audit.json`. It never overwrites the scan file; `downshift compare` reads both.
+- **`.bob/custom_modes.yaml` and `.bob/skills/` are shipped product files** (the Downshift Auditor mode and its skill), not scratch space.
 - **Plans stay small**: one job per task, touch only the files named in the request.
