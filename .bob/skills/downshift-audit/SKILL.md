@@ -18,7 +18,7 @@ Field reference: `schema-reference.md` in this skill folder. Read it before writ
    - it has 2 or more `callers` and its prompt is built by the callers
 3. For each worklist call site, read only its own file and the files of its `callers`. Read nothing else.
 4. Resolve models. Set `model.value` to the real model string, `model.source` to `manual`, keep `expression` and `env_var`, set `defined_in` to the file where the model string lives, set `found_by` to `bob`, and add a note starting with `Bob:` that says how you resolved it.
-5. Resolve prompts. Set `messages` to the full list as it is sent to the model. Write runtime values as `{placeholder}` using the variable name from the code. Set `resolved: true` on each message. Add a `Bob:` note.
+5. Resolve prompts. Set `messages` to the full list as it is sent to the model. Write runtime values as `{placeholder}` with a plain name: `{ticket['body']}` becomes `{body}`, an expression like `{json.dumps(order_info)}` becomes `{order_info_json}`, and a module constant is written out as its value. Set `resolved: true` on each message. Add a `Bob:` note.
 6. Split shared helpers. If one helper serves several features with different prompts, replace the helper entry with one entry per calling feature:
    - `id`: the caller's id in the form `path/to/file.py::qualname`
    - `file`, `line`, `end_line`, `function`: the caller's call to the helper
