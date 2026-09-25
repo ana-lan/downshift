@@ -10,7 +10,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from downshift.config import ScanConfig
-from downshift.schema import CallSite, ModelRef, ScanResult
+from downshift.resolve import Ctx, FunctionNode, Module, ModuleIndex, Resolver, keyword_arg
+from downshift.schema import CallSite, ModelRef, PromptMessage, ScanResult
 
 SKIP_DIRS = frozenset(
     {
@@ -54,7 +55,7 @@ def scan_path(root: Path, scan_config: ScanConfig | None = None) -> ScanResult:
         raise FileNotFoundError(f"path does not exist: {root}")
     root = root.resolve()
 
-    sites: list[CallSite] = []
+    modules: list[Module] = []
     warnings: list[str] = []
     files_scanned = 0
     for path, rel in iter_python_files(root, scan_config):
@@ -69,11 +70,13 @@ def scan_path(root: Path, scan_config: ScanConfig | None = None) -> ScanResult:
         except SyntaxError as exc:
             warnings.append(f"{rel}:{exc.lineno}: syntax error, skipped ({exc.msg})")
             continue
-        sites.extend(scan_module(tree, rel))
+        modules.append(Module.build(tree, rel))
 
-    sites.sort(key=lambda site: (site.file, site.line))
     return ScanResult(
-        root=root.name, files_scanned=files_scanned, call_sites=sites, warnings=warnings
+        root=root.name,
+        files_scanned=files_scanned,
+        call_sites=_scan_modules(modules),
+        warnings=warnings,
     )
 
 
@@ -83,35 +86,8 @@ def scan_source(source: str, rel: str = "<string>") -> list[CallSite]:
 
 
 def scan_module(tree: ast.Module, rel: str) -> list[CallSite]:
-    """Return the call sites in one parsed module."""
-    finder = _CallFinder()
-    finder.visit(tree)
-
-    sites: list[CallSite] = []
-    seen: dict[str, int] = {}
-    for found in finder.found:
-        base_id = f"{rel}::{found.qualname}"
-        seen[base_id] = seen.get(base_id, 0) + 1
-        site_id = base_id if seen[base_id] == 1 else f"{base_id}#{seen[base_id]}"
-
-        model = _model_ref(found.node)
-        sites.append(
-            CallSite(
-                id=site_id,
-                file=rel,
-                line=found.node.lineno,
-                end_line=found.node.end_lineno,
-                function=found.qualname,
-                api=found.api,
-                model=model,
-                is_async=found.is_async,
-                output_format=_output_format(found.node, found.api),
-                temperature=_temperature(found.node),
-                max_tokens=_max_tokens(found.node),
-                notes=_notes(model),
-            )
-        )
-    return sites
+    """Return the call sites in one parsed module, resolving names within it only."""
+    return _scan_modules([Module.build(tree, rel)])
 
 
 def iter_python_files(root: Path, scan_config: ScanConfig) -> Iterator[tuple[Path, str]]:
@@ -133,7 +109,69 @@ def iter_python_files(root: Path, scan_config: ScanConfig) -> Iterator[tuple[Pat
             yield path, rel
 
 
-# --- finding calls ------------------------------------------------------------
+# --- scanning -----------------------------------------------------------------
+
+
+def _scan_modules(modules: list[Module]) -> list[CallSite]:
+    resolver = Resolver(ModuleIndex(modules))
+    sites: list[CallSite] = []
+    calls: list[tuple[str, str]] = []
+    for module in modules:
+        finder = _CallFinder()
+        finder.visit(module.tree)
+        calls.extend((f"{module.rel}::{caller}", callee) for caller, callee in finder.calls)
+        sites.extend(_build_sites(module, finder.found, resolver))
+    _attach_callers(sites, calls)
+    sites.sort(key=lambda site: (site.file, site.line))
+    return sites
+
+
+def _build_sites(module: Module, found: list[_FoundCall], resolver: Resolver) -> list[CallSite]:
+    sites: list[CallSite] = []
+    seen: dict[str, int] = {}
+    for item in found:
+        base_id = f"{module.rel}::{item.qualname}"
+        seen[base_id] = seen.get(base_id, 0) + 1
+        site_id = base_id if seen[base_id] == 1 else f"{base_id}#{seen[base_id]}"
+
+        ctx = Ctx(module, item.func, item.node.lineno)
+        model = resolver.resolve_model(item.node, ctx)
+        messages = resolver.resolve_messages(item.node, item.api, ctx)
+        sites.append(
+            CallSite(
+                id=site_id,
+                file=module.rel,
+                line=item.node.lineno,
+                end_line=item.node.end_lineno,
+                function=item.qualname,
+                api=item.api,
+                model=model,
+                is_async=item.is_async,
+                messages=messages,
+                output_format=_output_format(item.node, item.api),
+                temperature=_temperature(item.node),
+                max_tokens=_max_tokens(item.node),
+                notes=_notes(model, messages),
+            )
+        )
+    return sites
+
+
+def _attach_callers(sites: list[CallSite], calls: list[tuple[str, str]]) -> None:
+    """Name-based: record which functions call the function containing each call site."""
+    for site in sites:
+        if site.function == "<module>":
+            continue
+        short = site.function.split(".")[-1]
+        own = f"{site.file}::{site.function}"
+        site.callers = sorted(
+            {caller for caller, callee in calls if callee == short and caller != own}
+        )
+        if len(site.callers) > 1 and site.messages is None:
+            site.notes.append(
+                f"shared helper called from {len(site.callers)} places; each caller may be "
+                "a separate feature with its own prompt"
+            )
 
 
 @dataclass
@@ -141,15 +179,18 @@ class _FoundCall:
     node: ast.Call
     api: str
     qualname: str
+    func: FunctionNode | None
     is_async: bool
 
 
 class _CallFinder(ast.NodeVisitor):
-    """Walks a module and records LLM calls with their enclosing scope."""
+    """Walks a module, recording LLM calls and every function call's caller/callee."""
 
     def __init__(self) -> None:
         self.scope: list[str] = []
+        self.functions: list[FunctionNode] = []
         self.found: list[_FoundCall] = []
+        self.calls: list[tuple[str, str]] = []
         self._awaited: set[int] = set()
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
@@ -163,9 +204,11 @@ class _CallFinder(ast.NodeVisitor):
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         self._visit_function(node)
 
-    def _visit_function(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+    def _visit_function(self, node: FunctionNode) -> None:
         self.scope.append(node.name)
+        self.functions.append(node)
         self.generic_visit(node)
+        self.functions.pop()
         self.scope.pop()
 
     def visit_Await(self, node: ast.Await) -> None:
@@ -174,10 +217,16 @@ class _CallFinder(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
+        qualname = ".".join(self.scope) or "<module>"
+        if isinstance(node.func, ast.Name):
+            self.calls.append((qualname, node.func.id))
+        elif isinstance(node.func, ast.Attribute):
+            self.calls.append((qualname, node.func.attr))
+
         api = _match_api(node)
         if api is not None:
-            qualname = ".".join(self.scope) or "<module>"
-            self.found.append(_FoundCall(node, api, qualname, id(node) in self._awaited))
+            func = self.functions[-1] if self.functions else None
+            self.found.append(_FoundCall(node, api, qualname, func, id(node) in self._awaited))
         self.generic_visit(node)
 
 
@@ -204,34 +253,10 @@ def _match_api(call: ast.Call) -> str | None:
 # --- reading call arguments ---------------------------------------------------
 
 
-def _keyword(call: ast.Call, *names: str) -> ast.expr | None:
-    for kw in call.keywords:
-        if kw.arg in names:
-            return kw.value
-    return None
-
-
-def _model_ref(call: ast.Call) -> ModelRef:
-    """Resolve the model argument. 2d handles literals only; 2e adds the rest."""
-    value = _keyword(call, "model")
-    if value is not None:
-        expression = ast.unparse(value)
-        if isinstance(value, ast.Constant) and isinstance(value.value, str):
-            return ModelRef(value=value.value, source="literal", expression=expression)
-        return ModelRef(value=None, source="dynamic", expression=expression)
-
-    unpacked = [kw for kw in call.keywords if kw.arg is None]
-    if unpacked:
-        return ModelRef(
-            value=None, source="kwargs", expression="**" + ast.unparse(unpacked[0].value)
-        )
-    return ModelRef(value=None, source="missing", expression="")
-
-
 def _output_format(call: ast.Call, api: str) -> str:
     if api.endswith(".parse"):
         return "json"
-    fmt = _keyword(call, "response_format")
+    fmt = keyword_arg(call, "response_format")
     if isinstance(fmt, ast.Dict):
         for key, val in zip(fmt.keys, fmt.values, strict=True):
             if (
@@ -245,7 +270,7 @@ def _output_format(call: ast.Call, api: str) -> str:
 
 
 def _temperature(call: ast.Call) -> float | None:
-    value = _keyword(call, "temperature")
+    value = keyword_arg(call, "temperature")
     if isinstance(value, ast.Constant) and isinstance(value.value, (int, float)):
         if isinstance(value.value, bool):
             return None
@@ -254,7 +279,7 @@ def _temperature(call: ast.Call) -> float | None:
 
 
 def _max_tokens(call: ast.Call) -> int | None:
-    value = _keyword(call, *MAX_TOKEN_KWARGS)
+    value = keyword_arg(call, *MAX_TOKEN_KWARGS)
     if (
         isinstance(value, ast.Constant)
         and isinstance(value.value, int)
@@ -265,9 +290,21 @@ def _max_tokens(call: ast.Call) -> int | None:
     return None
 
 
-def _notes(model: ModelRef) -> list[str]:
+def _notes(model: ModelRef, messages: list[PromptMessage] | None) -> list[str]:
+    notes: list[str] = []
     if model.source == "kwargs":
-        return [f"model is passed via {model.expression} and could not be resolved statically"]
-    if model.source == "missing":
-        return ["no model argument found at this call"]
-    return []
+        notes.append(f"model is passed via {model.expression} and could not be resolved statically")
+    elif model.source == "missing":
+        notes.append("no model argument found at this call")
+    elif model.source == "env_default":
+        notes.append(f"model comes from env var {model.env_var}; assuming default {model.value!r}")
+    elif model.source == "env":
+        notes.append(f"model comes from env var {model.env_var} with no default")
+    elif model.source == "dynamic":
+        notes.append(f"model is computed at runtime ({model.expression})")
+
+    if messages is None:
+        notes.append("messages are built at runtime; the prompt template could not be recovered")
+    elif not all(m.resolved for m in messages):
+        notes.append("part of the prompt comes from a runtime value the scanner could not see")
+    return notes
