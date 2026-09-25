@@ -10,7 +10,9 @@ from rich.table import Table
 from downshift import __version__
 from downshift.audit import Comparison, compare_scans, validate_file
 from downshift.config import ConfigError, resolve_config
-from downshift.evals import EvalReport, check_eval_dir
+from downshift.evalgen import EvalGenSkip, generate_eval_set, write_eval_set
+from downshift.evals import EVAL_SUFFIX, EvalReport, check_eval_dir, site_placeholders, slug_for
+from downshift.llm import LLMClient, LLMError, OpenAICompatClient
 from downshift.scanner import scan_path
 from downshift.schema import ScanResult, SchemaError
 
@@ -275,13 +277,87 @@ def _print_eval_reports(reports: list[EvalReport]) -> None:
     Console().print(table)
 
 
-# --- not implemented yet ------------------------------------------------------
+# --- evalgen ------------------------------------------------------------------
+
+
+def _make_client(provider_base_url: str, api_key: str) -> LLMClient:
+    return OpenAICompatClient(provider_base_url, api_key)
 
 
 @app.command()
-def evalgen() -> None:
-    """Generate an eval set for each call site."""
-    _not_implemented("evalgen")
+def evalgen(
+    callsites: Path = typer.Option(..., "--callsites", help="Audit (or callsites) JSON."),
+    out: Path = typer.Option(..., "--out", "-o", help="Folder to write <slug>.jsonl files to."),
+    site: list[str] = typer.Option([], "--site", help="Only this call site id. Repeatable."),
+    model: str | None = typer.Option(None, "--model", help="Default: models.judge or baseline."),
+    count: int = typer.Option(20, "--count", min=1, help="Cases per call site."),
+    shared: list[str] = typer.Option(
+        [], "--shared", help="KEY=FILE, a fixed input read from a file. Repeatable."
+    ),
+    config: Path | None = typer.Option(None, "--config", "-c", help="Config file."),
+    force: bool = typer.Option(False, "--force", help="Overwrite existing eval files."),
+) -> None:
+    """Generate an eval set for each call site with a configured model."""
+    try:
+        result = ScanResult.load(callsites)
+        cfg = resolve_config(config, callsites.parent)
+        client = _make_client(cfg.provider.base_url, cfg.provider.api_key())
+    except (SchemaError, ConfigError) as exc:
+        _fail(str(exc))
+        return
+
+    shared_files: dict[str, Path] = {}
+    for item in shared:
+        key, sep, file = item.partition("=")
+        if not sep or not key or not Path(file).is_file():
+            _fail(f"--shared expects KEY=FILE with an existing file, got {item!r}")
+            return
+        shared_files[key] = Path(file)
+    shared_text = {k: p.read_text(encoding="utf-8") for k, p in shared_files.items()}
+
+    sites = result.call_sites
+    if site:
+        known = {s.id for s in sites}
+        unknown = [s for s in site if s not in known]
+        if unknown:
+            _fail(f"unknown call site id(s): {', '.join(unknown)}")
+            return
+        sites = [s for s in sites if s.id in site]
+
+    use_model = model or cfg.models.judge_model
+    failed = False
+    for call_site in sites:
+        path = out / f"{slug_for(call_site.id)}{EVAL_SUFFIX}"
+        if path.exists() and not force:
+            typer.echo(f"skip {call_site.id}: {path} exists (use --force)")
+            continue
+        try:
+            gen = generate_eval_set(client, use_model, call_site, count=count, shared=shared_text)
+        except EvalGenSkip as exc:
+            typer.echo(f"skip {call_site.id}: {exc}")
+            continue
+        except LLMError as exc:
+            typer.echo(f"error {call_site.id}: {exc}", err=True)
+            failed = True
+            continue
+        if not gen.cases:
+            typer.echo(
+                f"error {call_site.id}: no valid cases after {gen.attempts} attempts", err=True
+            )
+            failed = True
+            continue
+        names = set(site_placeholders(call_site))
+        used = {k: p for k, p in shared_files.items() if k in names}
+        write_eval_set(path, gen.cases, used)
+        typer.echo(
+            f"wrote {path} ({len(gen.cases)} cases, {len(gen.dropped)} dropped, "
+            f"{gen.attempts} calls, model {use_model})"
+        )
+    if failed:
+        raise typer.Exit(code=1)
+
+
+# --- not implemented yet ------------------------------------------------------
 
 
 @app.command()
