@@ -1,0 +1,33 @@
+# Downshift configuration. Copy to downshift.yaml in the repo you want to scan.
+version: 1
+
+# Any OpenAI-compatible endpoint: Ollama, vLLM, OpenAI, Groq, OpenRouter, ...
+provider:
+  base_url: "http://localhost:11434/v1"
+  api_key_env: null            # name of an env var holding the key, or null for local servers
+
+models:
+  baseline: "qwen2.5:7b"       # the model your code uses today
+  candidates:                  # cheaper models to test against it
+    - "qwen2.5:1.5b"
+    - "qwen2.5:0.5b"
+  judge: null                  # grades free-text outputs; defaults to the baseline
+
+# A candidate must score at least this fraction of the baseline's quality.
+quality_threshold: 0.95
+
+# USD per 1M tokens. These are illustrative tier prices so the local models
+# map to realistic API costs. Replace them with your provider's current prices.
+pricing:
+  "qwen2.5:7b":   { input: 2.50, output: 10.00, tier: premium }
+  "qwen2.5:1.5b": { input: 0.15, output: 0.60,  tier: budget }
+  "qwen2.5:0.5b": { input: 0.10, output: 0.40,  tier: nano }
+
+# Calls per day, used to project monthly spend.
+volume:
+  default_per_day: 1000
+  per_call_site: {}            # e.g. "app/triage.py::classify": 50000
+
+scan:
+  include: ["*.py"]
+  exclude: ["tests/*"]

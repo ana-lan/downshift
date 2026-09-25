@@ -1,0 +1,22 @@
+# Downshift config for the SupportDesk demo app.
+# Assumes 20,000 tickets/day, each running every LLM feature once.
+version: 1
+
+provider:
+  base_url: "http://localhost:11434/v1"
+
+models:
+  baseline: "qwen2.5:7b"
+  candidates: ["qwen2.5:1.5b", "qwen2.5:0.5b"]
+
+quality_threshold: 0.95
+
+pricing:
+  "qwen2.5:7b":   { input: 2.50, output: 10.00, tier: premium }
+  "qwen2.5:1.5b": { input: 0.15, output: 0.60,  tier: budget }
+  "qwen2.5:0.5b": { input: 0.10, output: 0.40,  tier: nano }
+
+volume:
+  default_per_day: 20000
+  per_call_site:
+    "supportdesk/llm.py::ask": 40000   # shared helper: sentiment + urgency
