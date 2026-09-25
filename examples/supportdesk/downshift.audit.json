@@ -1,0 +1,345 @@
+{
+  "schema_version": 1,
+  "tool": "downshift",
+  "tool_version": "0.1.0.dev0",
+  "generated_by": "bob",
+  "root": "supportdesk",
+  "summary": {
+    "files_scanned": 9,
+    "call_sites": 8,
+    "models_resolved": 8,
+    "prompts_resolved": 8
+  },
+  "warnings": [],
+  "call_sites": [
+    {
+      "id": "supportdesk/agent_assist.py::draft_reply",
+      "file": "supportdesk/agent_assist.py",
+      "line": 34,
+      "function": "draft_reply",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "qwen2.5:7b",
+        "source": "env_default",
+        "expression": "DEFAULT_MODEL",
+        "env_var": "SUPPORTDESK_MODEL",
+        "defined_in": "supportdesk/llm.py"
+      },
+      "end_line": 57,
+      "is_async": true,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a friendly, concise customer support agent for SupportDesk Store. Never promise refunds, credits, or delivery dates. Say a teammate will confirm next steps. Keep replies under 120 words.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "Reply language (ISO 639-1): {language}\nAgent summary: {summary}\n\nCustomer subject: {subject}\nCustomer message:\n{body}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 250,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model comes from env var SUPPORTDESK_MODEL; assuming default 'qwen2.5:7b'",
+        "Manual: placeholders renamed to plain names so eval inputs can fill them."
+      ],
+      "purpose": "Draft a customer-facing reply to a support ticket in the customer's detected language.",
+      "output_contract": "Plain-text reply under 120 words, in the language given by the ISO 639-1 code in {language}. Must not promise refunds, credits, delivery dates or specific timeframes (for example '24-48 hours'). Must say that a teammate will confirm next steps.",
+      "difficulty": "hard",
+      "grading": "judge",
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/agent_assist.py::summarize_for_agent",
+      "file": "supportdesk/agent_assist.py",
+      "line": 23,
+      "function": "summarize_for_agent",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "qwen2.5:7b",
+        "source": "env_default",
+        "expression": "SUMMARY_MODEL",
+        "env_var": "SUMMARY_MODEL",
+        "defined_in": "supportdesk/agent_assist.py"
+      },
+      "end_line": 28,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Summarize this support ticket for a human support agent.\nWrite exactly 2 short sentences in English: what the customer wants,\nand the key details (order ID, dates, amounts) if present.\n\nSubject: {subject}\nMessage:\n{body}\n",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 120,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model comes from env var SUMMARY_MODEL; assuming default 'qwen2.5:7b'",
+        "Manual: placeholders renamed to plain names so eval inputs can fill them."
+      ],
+      "purpose": "Produce a two-sentence English summary of a support ticket for a human agent.",
+      "output_contract": "Exactly 2 short sentences in English. Sentence 1: what the customer wants. Sentence 2: the key details (order ID, dates, amounts) when the ticket has them. Must not invent details that are not in the ticket.",
+      "difficulty": "medium",
+      "grading": "judge",
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/extract.py::extract_order_info",
+      "file": "supportdesk/extract.py",
+      "line": 21,
+      "function": "extract_order_info",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "qwen2.5:7b",
+        "source": "env_default",
+        "expression": "EXTRACTION_MODEL",
+        "env_var": "SUPPORTDESK_MODEL",
+        "defined_in": "supportdesk/llm.py"
+      },
+      "end_line": 30,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "Extract the order ID and the order date from the support ticket.\nOrder IDs look like ORD-12345.\nReturn JSON with exactly two keys: order_id and order_date.\norder_date must be YYYY-MM-DD. Use null for anything not stated explicitly.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "{ticket_text}",
+          "resolved": true
+        }
+      ],
+      "output_format": "json",
+      "temperature": 0.0,
+      "max_tokens": 60,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model comes from env var SUPPORTDESK_MODEL; assuming default 'qwen2.5:7b'"
+      ],
+      "purpose": "Extract order ID and order date from a support ticket body.",
+      "output_contract": "JSON object with exactly two keys: `order_id` (string matching ORD-\\d+ or null) and `order_date` (string in YYYY-MM-DD format or null); no additional keys; values must be null when not explicitly stated. Graded fields: order_id, order_date.",
+      "difficulty": "medium",
+      "grading": "json_fields",
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/misc_utils.py::lang_of",
+      "file": "supportdesk/misc_utils.py",
+      "line": 25,
+      "function": "lang_of",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "qwen2.5:7b",
+        "source": "manual",
+        "expression": "**params",
+        "env_var": "SUPPORTDESK_MODEL",
+        "defined_in": "supportdesk/llm.py"
+      },
+      "end_line": 25,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Which language is this text written in? Reply with the two-letter ISO 639-1 code only (for example: en, es, fr).\n\nText:\n{text}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 5,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model is passed via **params and could not be resolved statically",
+        "Bob: model resolved by tracing _LANG_REQUEST dict in misc_utils.py; key 'model' is set to DEFAULT_MODEL imported from llm.py, which reads os.getenv('SUPPORTDESK_MODEL', 'qwen2.5:7b'); source set to manual.",
+        "Bob: prompt resolved by reading params['messages'] construction in lang_of(); single user message built inline with the literal instruction string and f-string interpolation of {text}."
+      ],
+      "purpose": "Detect the language of a support ticket and return the ISO 639-1 two-letter code.",
+      "output_contract": "Exactly one two-letter lowercase ISO 639-1 code (e.g. 'en', 'es', 'fr'); no punctuation, no extra words; caller takes only the first two characters of the response.",
+      "difficulty": "easy",
+      "grading": "exact",
+      "found_by": "bob"
+    },
+    {
+      "id": "supportdesk/policy.py::decide_refund",
+      "file": "supportdesk/policy.py",
+      "line": 22,
+      "function": "decide_refund",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "qwen2.5:7b",
+        "source": "dict_lookup",
+        "expression": "MODELS['refund_decision']",
+        "env_var": null,
+        "defined_in": "supportdesk/policy.py"
+      },
+      "end_line": 53,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a refund policy assistant. Apply the policy exactly as written. Count days carefully between the order date and today's date.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "Refund policy:\n{policy}\n\nToday's date: {today}\nExtracted order info: {order_info_json}\n\nTicket subject: {subject}\nTicket message:\n{body}\n\nReturn JSON with these keys, in this order:\n  \"reasoning\": 1-3 sentences applying the policy,\n  \"is_refund_request\": true or false,\n  \"eligible\": \"yes\", \"no\", \"store_credit\", or \"need_info\",\n  \"policy_section\": the section number you applied, e.g. \"2.1\".\nIf it is not a refund request, set eligible to \"no\" and policy_section to null.",
+          "resolved": true
+        }
+      ],
+      "output_format": "json",
+      "temperature": 0.0,
+      "max_tokens": 220,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "Manual: placeholders renamed to plain names so eval inputs can fill them."
+      ],
+      "purpose": "Apply the store refund policy to a ticket and return a structured eligibility decision.",
+      "output_contract": "JSON object with exactly four keys in order: reasoning (string, 1-3 sentences), is_refund_request (boolean), eligible (one of \"yes\", \"no\", \"store_credit\", \"need_info\"), policy_section (string like \"2.1\", or null). When is_refund_request is false, eligible must be \"no\" and policy_section must be null. Graded fields: is_refund_request, eligible, policy_section, which must match the refund policy applied to the order date and today's date. reasoning is not graded.",
+      "difficulty": "hard",
+      "grading": "json_fields",
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/triage.py::classify_category",
+      "file": "supportdesk/triage.py",
+      "line": 12,
+      "function": "classify_category",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "qwen2.5:7b",
+        "source": "literal",
+        "expression": "'qwen2.5:7b'",
+        "env_var": null,
+        "defined_in": "supportdesk/triage.py"
+      },
+      "end_line": 28,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a support ticket classifier.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "Classify this support ticket into exactly one category: billing, shipping, technical, account, refund, other.\nReply with the category name only.\n\nTicket:\n{ticket_text}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 5,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "Manual: placeholders renamed to plain names so eval inputs can fill them."
+      ],
+      "purpose": "Classify a support ticket into exactly one of six predefined categories.",
+      "output_contract": "Exactly one lowercase word from the set {billing, shipping, technical, account, refund, other}; no punctuation, no extra words; max_tokens is 5.",
+      "difficulty": "easy",
+      "grading": "exact",
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/triage.py::detect_sentiment",
+      "file": "supportdesk/triage.py",
+      "line": 34,
+      "function": "detect_sentiment",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "qwen2.5:7b",
+        "source": "manual",
+        "expression": "DEFAULT_MODEL",
+        "env_var": "SUPPORTDESK_MODEL",
+        "defined_in": "supportdesk/llm.py"
+      },
+      "end_line": 40,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "user",
+          "content": "What is the customer's overall sentiment? Reply with one word: positive, neutral, or negative.\n\nTicket:\n{ticket_text}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 3,
+      "via": "supportdesk/llm.py::ask",
+      "callers": [],
+      "notes": [
+        "Bob: split from shared helper supportdesk/llm.py::ask; detect_sentiment calls ask() with no system argument; prompt is the literal f-string constructed in triage.py:detect_sentiment(); max_tokens=3 passed explicitly."
+      ],
+      "purpose": "Classify the customer's overall sentiment in a support ticket as positive, neutral, or negative.",
+      "output_contract": "Exactly one lowercase word from the set {positive, neutral, negative}; caller strips trailing period and lowercases; max_tokens is 3.",
+      "difficulty": "easy",
+      "grading": "exact",
+      "found_by": "bob"
+    },
+    {
+      "id": "supportdesk/triage.py::tag_urgency",
+      "file": "supportdesk/triage.py",
+      "line": 54,
+      "function": "tag_urgency",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "qwen2.5:7b",
+        "source": "manual",
+        "expression": "DEFAULT_MODEL",
+        "env_var": "SUPPORTDESK_MODEL",
+        "defined_in": "supportdesk/llm.py"
+      },
+      "end_line": 55,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a support operations lead.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "This is a '{category}' support ticket.\nRate its urgency as low, medium, or high.\nHigh: money lost, service down for many users, or a very angry repeat contact.\nMedium: an order or account problem that blocks the customer.\nLow: questions, feedback, and requests with no time pressure.\nReply with one word.\n\nTicket:\n{ticket_text}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 3,
+      "via": "supportdesk/llm.py::ask",
+      "callers": [],
+      "notes": [
+        "Bob: split from shared helper supportdesk/llm.py::ask; tag_urgency calls ask() with system='You are a support operations lead.' and max_tokens=3; prompt is the f-string constructed in triage.py:tag_urgency() incorporating {category} and {ticket_text}."
+      ],
+      "purpose": "Rate the urgency of a support ticket as low, medium, or high based on its category and content.",
+      "output_contract": "Exactly one lowercase word from the set {low, medium, high}; caller strips trailing period and lowercases; max_tokens is 3.",
+      "difficulty": "easy",
+      "grading": "exact",
+      "found_by": "bob"
+    }
+  ]
+}

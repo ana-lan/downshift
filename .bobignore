@@ -1,0 +1,17 @@
+# Keep Bob's context small (every file read costs Bobcoins)
+.venv/
+.git/
+results/
+**/.downshift/
+web/node_modules/
+web/.next/
+dist/
+build/
+*.egg-info/
+__pycache__/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+bob_sessions/
