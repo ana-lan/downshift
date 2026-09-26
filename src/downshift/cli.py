@@ -24,6 +24,7 @@ from downshift.evals import (
     validate_eval_set,
 )
 from downshift.llm import LLMClient, LLMError, OpenAICompatClient
+from downshift.report import ReportError, build_report, render_markdown
 from downshift.runner import ResultRow, Runner, RunSummary, rescore_site, results_path
 from downshift.scanner import scan_path
 from downshift.schema import CallSite, ScanResult, SchemaError
@@ -665,9 +666,77 @@ def _print_rescore_summary(pairs: list[tuple[RunSummary, RunSummary]], judge_mod
 
 
 @app.command()
-def report() -> None:
+def report(
+    callsites: Path = typer.Option(..., "--callsites", help="Audit (or callsites) JSON."),
+    evals: Path | None = typer.Option(
+        None, "--evals", help="Eval folder. Default: evals/ next to --callsites."
+    ),
+    results: Path | None = typer.Option(
+        None, "--results", help="Results folder. Default: results/ next to --callsites."
+    ),
+    config: Path | None = typer.Option(None, "--config", "-c", help="Config file."),
+    threshold: float | None = typer.Option(
+        None,
+        "--threshold",
+        min=0.0,
+        max=1.0,
+        help="Quality threshold override (0,1]. Default: from config.",
+    ),
+    min_pass_rate: float | None = typer.Option(
+        None,
+        "--min-pass-rate",
+        min=0.0,
+        max=1.0,
+        help="Minimum pass rate override [0,1]. Default: from config.",
+    ),
+    out: Path | None = typer.Option(None, "--out", help="Write Markdown to this file."),
+) -> None:
     """Render the cost and quality report."""
-    _not_implemented("report")
+    if threshold is not None and threshold <= 0:
+        _fail("--threshold must be greater than 0")
+        return
+    try:
+        scan = ScanResult.load(callsites)
+        cfg = resolve_config(config, callsites.parent)
+    except (SchemaError, ConfigError) as exc:
+        _fail(str(exc))
+        return
+
+    evals_dir = evals if evals is not None else callsites.parent / "evals"
+    results_dir = results if results is not None else callsites.parent / "results"
+
+    try:
+        rep = build_report(
+            scan,
+            cfg,
+            evals_dir,
+            results_dir,
+            threshold=threshold,
+            min_pass_rate=min_pass_rate,
+        )
+    except ReportError as exc:
+        _fail(str(exc))
+        return
+
+    md = render_markdown(rep)
+
+    if out is None:
+        typer.echo(md, nl=False)
+        return
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(md, encoding="utf-8")
+
+    costs = rep.costs
+    n_down = len(rep.downgraded)
+    n_total = len(rep.decisions)
+    savings = costs.savings if costs.sites else 0.0
+    savings_pct = costs.savings_pct
+    pct_str = f"{savings_pct:.1%}" if savings_pct is not None else "n/a"
+    typer.echo(
+        f"Wrote {out}: downgraded {n_down} of {n_total} call sites,"
+        f" projected savings ${savings:,.2f}/month ({pct_str})."
+    )
 
 
 @app.command()
