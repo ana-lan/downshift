@@ -184,3 +184,38 @@ def test_api_key_missing_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("MY_LLM_KEY", raising=False)
     with pytest.raises(ConfigError, match="MY_LLM_KEY"):
         ProviderConfig(api_key_env="MY_LLM_KEY").api_key()
+
+
+# --- min_pass_rate -----------------------------------------------------------
+
+
+def test_min_pass_rate_defaults_to_off() -> None:
+    from downshift.config import parse_config
+
+    assert parse_config({"version": 1}).min_pass_rate == 0.0
+
+
+def test_min_pass_rate_parsed() -> None:
+    from downshift.config import parse_config
+
+    assert parse_config({"version": 1, "min_pass_rate": 0.8}).min_pass_rate == 0.8
+    assert parse_config({"version": 1, "min_pass_rate": 1}).min_pass_rate == 1.0
+
+
+@pytest.mark.parametrize("value", [-0.1, 1.5, True, "high"])
+def test_min_pass_rate_invalid(value: object) -> None:
+    from downshift.config import ConfigError, parse_config
+
+    with pytest.raises(ConfigError, match="min_pass_rate"):
+        parse_config({"version": 1, "min_pass_rate": value})
+
+
+def test_supportdesk_config_sets_floor() -> None:
+    from pathlib import Path
+
+    from downshift.config import load_config
+
+    root = Path(__file__).resolve().parents[2]
+    cfg = load_config(root / "examples" / "supportdesk" / "downshift.yaml")
+    assert cfg.min_pass_rate == 0.8
+    assert cfg.quality_threshold == 0.95

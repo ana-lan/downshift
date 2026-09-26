@@ -83,6 +83,7 @@ class Config:
     provider: ProviderConfig = field(default_factory=ProviderConfig)
     models: ModelsConfig = field(default_factory=ModelsConfig)
     quality_threshold: float = 0.95
+    min_pass_rate: float = 0.0
     pricing: Mapping[str, ModelPrice] = field(default_factory=dict)
     volume: VolumeConfig = field(default_factory=VolumeConfig)
     scan: ScanConfig = field(default_factory=ScanConfig)
@@ -138,6 +139,7 @@ _TOP_LEVEL_KEYS = {
     "provider",
     "models",
     "quality_threshold",
+    "min_pass_rate",
     "pricing",
     "volume",
     "scan",
@@ -236,6 +238,14 @@ def _parse_threshold(data: dict[str, Any], problems: list[str]) -> float:
     return float(value)
 
 
+def _parse_min_pass_rate(data: dict[str, Any], problems: list[str]) -> float:
+    value = data.get("min_pass_rate", 0.0)
+    if not _is_number(value) or not 0 <= value <= 1:
+        problems.append("min_pass_rate: must be a number from 0 to 1")
+        return 0.0
+    return float(value)
+
+
 def _parse_pricing(data: dict[str, Any], problems: list[str]) -> dict[str, ModelPrice]:
     section = _section(data, "pricing", problems)
     if section is None:
@@ -327,6 +337,7 @@ def parse_config(data: Any, source: Path | None = None) -> Config:
         provider=_parse_provider(data, problems),
         models=_parse_models(data, problems),
         quality_threshold=_parse_threshold(data, problems),
+        min_pass_rate=_parse_min_pass_rate(data, problems),
         pricing=_parse_pricing(data, problems),
         volume=_parse_volume(data, problems),
         scan=_parse_scan(data, problems),
