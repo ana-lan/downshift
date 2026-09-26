@@ -1,0 +1,245 @@
+{
+  "schema_version": 1,
+  "tool": "downshift",
+  "tool_version": "0.1.0.dev0",
+  "generated_by": "bob",
+  "root": "OrchestrAI",
+  "summary": {
+    "files_scanned": 28,
+    "call_sites": 1,
+    "models_resolved": 0,
+    "prompts_resolved": 0
+  },
+  "warnings": [],
+  "call_sites": [
+    {
+      "id": "modules.py::chameleon",
+      "file": "modules.py",
+      "line": 74,
+      "end_line": 74,
+      "function": "chameleon",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "gpt-4-0613",
+        "source": "manual",
+        "expression": "self.model",
+        "env_var": null,
+        "defined_in": "config.yml"
+      },
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a module in OrchestrAI, a framework chaining together LLMs to build large scale autonomous systems. You are completely restricted to the following functionality.\n\n --- CODE_PLANNER ---\n\nYou are a super smart developer. You have been asked to make a specification for a program.Think step by step to make sure we get a high quality specification and we don't miss anything.First, be super explicit about what the program should do, which features it should haveand give details about anything that might be unclear. **Don't leave anything unclear or undefined.**Second, lay out the names of the core classes, functions, methods that will be necessary,as well as a quick comment on their purpose. The scripts will not be nested within a further directory.Running the full code should always be possible by running main.py.This specification will be used later as the basis for the implementation.\n",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "REQUEST: {request}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.7,
+      "max_tokens": null,
+      "via": "ai.py::AI.generate_response",
+      "callers": [],
+      "notes": [
+        "Bob: split from shared helper ai.py::AI.generate_response; this entry represents the code_planner pipeline module, which has no dedicated function in modules.py and is therefore dispatched by orchestrate.py via modules.chameleon with system_prompts/code_planner.txt.",
+        "Bob: model resolved from config.yml default_model ('gpt-4-0613'); no model_config is set for this module in pipelines/engineering_pipeline.yml.",
+        "Bob: temperature resolved from config.yml default_temperature (0.7); max_tokens is null (default_max_tokens: null in config.yml).",
+        "Bob: system prompt built by helpers.load_system_prompt('code_planner'): general_system.txt content (newlines stripped) + '\\n\\n --- CODE_PLANNER ---\\n\\n' + system_prompts/code_planner.txt content (newlines stripped) + '\\n'. tools_enabled is false in config.yml so no tool_prompt is appended.",
+        "Bob: user message built by orchestrate.execute_pipeline (line 83): inputs=[request], formatted as 'REQUEST: {request}'.",
+        "Bob: other pipelines exist in this repo but are out of scope per audit instructions; only engineering_pipeline (config.yml pipeline key) is audited. Other pipelines are not represented in this audit.",
+        "Bob: start_module is skipped — it makes no LLM call (only reads stdin and returns user input string)."
+      ],
+      "purpose": "Produce a detailed written specification for a software program based on the user's request, enumerating features, classes, functions, and methods before any code is generated.",
+      "output_contract": "Free-form text. Must include: (1) explicit description of what the program does and its features; (2) named list of core classes, functions, and methods with brief comments; (3) statement that main.py is the entry point. No code should be generated at this stage.",
+      "difficulty": "hard",
+      "grading": "judge",
+      "found_by": "bob"
+    },
+    {
+      "id": "modules.py::create_readme",
+      "file": "modules.py",
+      "line": 244,
+      "end_line": 244,
+      "function": "create_readme",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "gpt-4-0613",
+        "source": "manual",
+        "expression": "self.model",
+        "env_var": null,
+        "defined_in": "config.yml"
+      },
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a module in OrchestrAI, a framework chaining together LLMs to build large scale autonomous systems. You are completely restricted to the following functionality.\n\n --- CREATE_README ---\n\nYou are a brilliant software engineer who thrives on high quality documentation. The sole goal of your existence is to write the best documentation possible.You will receive a codebase and write a detailed README.md file for it.Start with a useful title, not just \"README.md\". Then, write a description of the project, what it does, and how to use it. Feel free to extend the README to a technical depth based on the provided code.Do not return anything else, just the README.md file.\n",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "MODIFIED_CODEBASE: {modified_codebase}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.7,
+      "max_tokens": null,
+      "via": "ai.py::AI.generate_response",
+      "callers": [],
+      "notes": [
+        "Bob: split from shared helper ai.py::AI.generate_response; this entry represents the create_readme pipeline module.",
+        "Bob: model resolved from config.yml default_model ('gpt-4-0613'); no model_config is set for this module in pipelines/engineering_pipeline.yml.",
+        "Bob: temperature resolved from config.yml default_temperature (0.7); max_tokens is null (default_max_tokens: null in config.yml).",
+        "Bob: system prompt built by helpers.load_system_prompt('create_readme'): general_system.txt (newlines stripped) + '\\n\\n --- CREATE_README ---\\n\\n' + system_prompts/create_readme.txt (newlines stripped) + '\\n'. tools_enabled is false.",
+        "Bob: user message built by orchestrate.execute_pipeline (line 83): inputs=[modified_codebase], formatted as 'MODIFIED_CODEBASE: {modified_codebase}'."
+      ],
+      "purpose": "Generate a detailed README.md file for the final modified codebase produced by the engineering pipeline.",
+      "output_contract": "Plain markdown text only. Must start with a descriptive project title (not 'README.md'). Must include a project description and usage instructions. No code fences wrapping the whole response — only the README.md content itself.",
+      "difficulty": "medium",
+      "grading": "judge",
+      "found_by": "bob"
+    },
+    {
+      "id": "modules.py::debugger",
+      "file": "modules.py",
+      "line": 171,
+      "end_line": 171,
+      "function": "debugger",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "gpt-3.5-turbo-16k",
+        "source": "manual",
+        "expression": "self.model",
+        "env_var": null,
+        "defined_in": "pipelines/engineering_pipeline.yml"
+      },
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a module in OrchestrAI, a framework chaining together LLMs to build large scale autonomous systems. You are completely restricted to the following functionality.\n\n --- DEBUGGER ---\n\nYou are an expert software engineer.You have received a repository of code, and an associated error after running main.py. Think carefully about how the error occurs when the code is run, and how you can fix it.Your job is to fix the error, returning the full unredacted code of any scripts that have been modified.If the error is an import error, you can update requirements.txt to include the missing package.Each modified file must strictly follow a markdown code block format, where the following tokens must be replaced such thatFILENAME is the lowercase file name including the file extension, which can also include a folder it is saved within i.e test/filename.py,,LANG is the markup code block language for the code's language, and CODE is the code:FILENAME```LANGCODE```You should not deviate from the above format, as we will do regex matching on the output to extract the code. The only content of the response should be in the above format. For example,filename.py```python{{full unredacted fixed code here}}```You only need to return the modified files, not the entire codebase.\n",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "REQUEST: {request}\nCODE: {code}\n The error encountered is: \n{error_msg}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.7,
+      "max_tokens": null,
+      "via": "ai.py::AI.generate_response",
+      "callers": [],
+      "notes": [
+        "Bob: split from shared helper ai.py::AI.generate_response; this entry represents the debugger pipeline module.",
+        "Bob: model resolved from pipelines/engineering_pipeline.yml model_config.model ('gpt-3.5-turbo-16k'); this module has an explicit model_config block in the pipeline YAML.",
+        "Bob: temperature is 0.7 from pipelines/engineering_pipeline.yml model_config.temperature; max_tokens not set in model_config so falls back to default_max_tokens: null.",
+        "Bob: system prompt built by helpers.load_system_prompt('debugger'): general_system.txt (newlines stripped) + '\\n\\n --- DEBUGGER ---\\n\\n' + system_prompts/debugger.txt (newlines stripped) + '\\n'. tools_enabled is false.",
+        "Bob: user message is NOT the raw orchestrate module_input. The debugger() function (modules.py:169) builds the prompt as: codebase + '\\n The error encountered is: \\n' + error_msg, where codebase is the orchestrate-formatted input 'REQUEST: {request}\\nCODE: {code}'. error_msg is the runtime stderr from codebase_portal.run_main().",
+        "Bob: generate_response is called inside a while True loop (modules.py:130) with up to max_attempts=3 iterations per pipeline run; cost multiplier up to 3x per pipeline execution. A new AI instance is created on each iteration."
+      ],
+      "purpose": "Diagnose and fix runtime errors in the generated codebase by receiving the error message from executing main.py and returning corrected source files in a parseable markdown format.",
+      "output_contract": "Each modified file must be formatted as: '<filename>\\n```<lang>\\n<code>\\n```'. Only modified files returned, not the full codebase. Code must be fully functional and unredacted. Output must be regex-parseable (no additional prose).",
+      "difficulty": "hard",
+      "grading": "judge",
+      "found_by": "bob"
+    },
+    {
+      "id": "modules.py::engineer",
+      "file": "modules.py",
+      "line": 93,
+      "end_line": 93,
+      "function": "engineer",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "gpt-4-0613",
+        "source": "manual",
+        "expression": "self.model",
+        "env_var": null,
+        "defined_in": "config.yml"
+      },
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a module in OrchestrAI, a framework chaining together LLMs to build large scale autonomous systems. You are completely restricted to the following functionality.\n\n --- ENGINEER ---\n\nYou will get instructions for code to write.You will write a very long answer. Make sure that every detail of the architecture is, in the end, implemented as code.You will start with the \"main\" file, then go to the ones that are imported by that file, and so on.Please note that the code should be fully functional. No placeholders or empty functions.Follow a language and framework appropriate best practice file naming convention.Make sure that files contain all imports, types etc. Make sure that code in different files are compatible with each other.You should include a requirements.txt file with all dependencies, ignoring versions. Follow OOP Running the full code should always be possible by running main.py. Nothing should be redacted. Then you will output the content of each file including ALL code.Each file must strictly follow a markdown code block format, where the following tokens must be replaced such thatFILENAME is the lowercase file name including the file extension, which can also include a folder it is saved within i.e test/filename.py,LANG is the markup code block language for the code's language, and CODE is the code:FILENAME```LANGCODE```Do not comment on what every file does. You should not deviate from the above format, as we will do regex matching on the output to extract the code. The only content of the response should be in the above format. For examplefilename.py```python{{full unredacted code here}}```etc with other files.\n",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "REQUEST: {request}\nCODE_PLAN: {code_plan}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.7,
+      "max_tokens": null,
+      "via": "ai.py::AI.generate_response",
+      "callers": [],
+      "notes": [
+        "Bob: split from shared helper ai.py::AI.generate_response; this entry represents the engineer pipeline module.",
+        "Bob: model resolved from config.yml default_model ('gpt-4-0613'); no model_config is set for this module in pipelines/engineering_pipeline.yml.",
+        "Bob: temperature resolved from config.yml default_temperature (0.7); max_tokens is null.",
+        "Bob: system prompt built by helpers.load_system_prompt('engineer'): general_system.txt (newlines stripped) + '\\n\\n --- ENGINEER ---\\n\\n' + system_prompts/engineer.txt (newlines stripped) + '\\n'. tools_enabled is false.",
+        "Bob: user message built by orchestrate.execute_pipeline (line 83): inputs=[request, code_plan], formatted as 'REQUEST: {request}\\nCODE_PLAN: {code_plan}'."
+      ],
+      "purpose": "Implement a complete, runnable codebase from a written specification, producing every source file in a parseable markdown format ready for extraction to disk.",
+      "output_contract": "Every file must be formatted as: '<filename>\\n```<lang>\\n<code>\\n```'. Must include main.py as entry point and requirements.txt. All code fully functional, no placeholders. No prose between files. Output must be regex-parseable.",
+      "difficulty": "hard",
+      "grading": "judge",
+      "found_by": "bob"
+    },
+    {
+      "id": "modules.py::modify_codebase",
+      "file": "modules.py",
+      "line": 217,
+      "end_line": 217,
+      "function": "modify_codebase",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": "gpt-4-0613",
+        "source": "manual",
+        "expression": "self.model",
+        "env_var": null,
+        "defined_in": "config.yml"
+      },
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a module in OrchestrAI, a framework chaining together LLMs to build large scale autonomous systems. You are completely restricted to the following functionality.\n\n --- MODIFY_CODEBASE ---\n\nYou are an expert software engineer.You have received a repository of code, and some associated feedback from the user. Your job is to address the feedback from the user, fixing any errors or modifying and extending the codebase as instructed. You are able to create new files and modify existing files.Each new/modified file must strictly follow a markdown code block format, where the following tokens must be replaced such thatFILENAME is the lowercase file name including the file extension, which can also include a folder it is saved within i.e test/filename.py,,LANG is the markup code block language for the code's language, and CODE is the code:FILENAME```LANGCODE```You should not deviate from the above format, as we will do regex matching on the output to extract the code. The only content of the response should be in the above format. For example,filename.py```python{{full unredacted modified code here}}```You only need to return the modified files or new files, not the entire codebase.All code should run and be unredacted.\n",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "WORKING_CODEBASE: {working_codebase}\n -- User Instructions --{instructions}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.7,
+      "max_tokens": null,
+      "via": "ai.py::AI.generate_response",
+      "callers": [],
+      "notes": [
+        "Bob: split from shared helper ai.py::AI.generate_response; this entry represents the modify_codebase pipeline module.",
+        "Bob: model resolved from config.yml default_model ('gpt-4-0613'); no model_config is set for this module in pipelines/engineering_pipeline.yml.",
+        "Bob: temperature resolved from config.yml default_temperature (0.7); max_tokens is null.",
+        "Bob: system prompt built by helpers.load_system_prompt('modify_codebase'): general_system.txt (newlines stripped) + '\\n\\n --- MODIFY_CODEBASE ---\\n\\n' + system_prompts/modify_codebase.txt (newlines stripped) + '\\n'. tools_enabled is false.",
+        "Bob: user message is NOT the raw orchestrate module_input. The modify_codebase() function (modules.py:213) builds the prompt by appending user instructions: codebase + '\\n -- User Instructions --' + instructions, where codebase starts as the orchestrate-formatted 'WORKING_CODEBASE: {working_codebase}' and instructions is runtime stdin input.",
+        "Bob: generate_response is called inside a while True loop (modules.py:199) — once per user-requested modification round; loop continues until the user answers 'n'. Unbounded iteration count; cost is proportional to the number of modification rounds requested at runtime. After each round, modify_codebase also calls debugger() which itself loops up to 3 times."
+      ],
+      "purpose": "Apply user-specified modifications or feedback to the working codebase, producing updated source files that are re-debugged after each modification round.",
+      "output_contract": "Each new or modified file must be formatted as: '<filename>\\n```<lang>\\n<code>\\n```'. Only modified/new files returned, not the full codebase. All code must be fully functional and unredacted. Output must be regex-parseable.",
+      "difficulty": "hard",
+      "grading": "judge",
+      "found_by": "bob"
+    }
+  ]
+}
