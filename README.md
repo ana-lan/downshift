@@ -1,13 +1,19 @@
-# Downshift
+<div align="center">
 
-**Cut LLM costs per PR.** Downshift finds every LLM call in a Python repo, tests cheaper models against evals written for each call site, recommends the safe downgrades, and shows the projected cost impact of every pull request.
+<h1>Downshift</h1>
 
-[![PyPI](https://img.shields.io/pypi/v/downshift)](https://pypi.org/project/downshift/)
-[![Python](https://img.shields.io/pypi/pyversions/downshift)](https://pypi.org/project/downshift/)
-[![CI](https://github.com/ana-lan/downshift/actions/workflows/ci.yml/badge.svg)](https://github.com/ana-lan/downshift/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/ana-lan/downshift/blob/main/LICENSE)
+<p><strong>Cut LLM costs per PR.</strong> Downshift finds every LLM call in a Python repo, tests cheaper models against evals written for each call site, recommends the safe downgrades, and shows the projected cost impact of every pull request.</p>
 
-**Live demo:** https://downshift-llm.vercel.app/
+<p>
+<a href="https://pypi.org/project/downshift/"><img src="https://img.shields.io/pypi/v/downshift" alt="PyPI"></a>
+<a href="https://pypi.org/project/downshift/"><img src="https://img.shields.io/pypi/pyversions/downshift" alt="Python"></a>
+<a href="https://github.com/ana-lan/downshift/actions/workflows/ci.yml"><img src="https://github.com/ana-lan/downshift/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+<a href="https://github.com/ana-lan/downshift/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
+</p>
+
+<p><strong>Live demo:</strong> <a href="https://downshift-llm.vercel.app/">downshift-llm.vercel.app</a></p>
+
+</div>
 
 Downshift is the toolkit, [IBM Bob](https://bob.ibm.com/) is the brain. Static analysis gets most of the way. Bob closes the gaps that need real code understanding (models and prompts only known at runtime, one helper serving several features), writes the evals, applies the changes, and reviews PRs. Everything except the audit runs without Bob.
 
