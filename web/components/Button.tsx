@@ -9,21 +9,20 @@ interface LinkButtonProps {
   children: ReactNode;
 }
 
-export function LinkButton({ href, variant = "primary", children }: LinkButtonProps) {
-  const isExternal = href.startsWith("http");
-  const className =
-    variant === "primary"
-      ? "inline-flex items-center px-4 py-2.5 rounded-lg bg-accent-bg border border-accent-line text-accent-fg text-sm font-medium hover:opacity-90 transition-opacity"
-      : "inline-flex items-center px-4 py-2.5 rounded-lg border border-line text-text text-sm font-medium hover:border-subtle transition-colors";
+const variantClass: Record<Variant, string> = {
+  primary: "bg-brand text-white dark:text-slate-950 font-semibold hover:opacity-90",
+  secondary: "border border-line text-heading hover:bg-card",
+};
 
-  if (isExternal) {
+export function LinkButton({ href, variant = "primary", children }: LinkButtonProps) {
+  const className = `inline-flex items-center rounded-md px-4 py-2 text-sm transition ${variantClass[variant]}`;
+  if (href.startsWith("http")) {
     return (
       <a href={href} target="_blank" rel="noreferrer" className={className}>
         {children}
       </a>
     );
   }
-
   return (
     <Link href={href} className={className}>
       {children}

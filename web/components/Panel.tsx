@@ -7,11 +7,9 @@ interface PanelProps {
 
 export function Panel({ children, className = "" }: PanelProps) {
   return (
-    <div
-      className={`rounded-2xl border border-line bg-panel px-5 sm:px-10 py-6 sm:py-10 mt-4 sm:mt-6 ${className}`}
-    >
+    <section className={`border-t border-line first:border-t-0 py-12 sm:py-16 ${className}`}>
       {children}
-    </div>
+    </section>
   );
 }
 
@@ -24,10 +22,13 @@ interface SectionProps {
 export function Section({ eyebrow, title, children }: SectionProps) {
   return (
     <Panel>
-      <p className="text-xs font-mono text-accent-2 tracking-wider mb-3 uppercase">
-        {eyebrow}
-      </p>
-      <h2 className="text-xl sm:text-2xl font-semibold text-heading mb-5 sm:mb-6">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="h-px w-6 bg-brand" />
+        <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-accent-2">
+          {eyebrow}
+        </p>
+      </div>
+      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-heading mb-6 sm:mb-8">
         {title}
       </h2>
       {children}

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "npx serve out",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {

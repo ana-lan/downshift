@@ -1,4 +1,12 @@
-type Tone = "accent" | "good" | "warn" | "bad";
+type Tone = "accent" | "good" | "warn" | "bad" | "violet";
+
+const toneValueClass: Record<Tone, string> = {
+  accent: "text-accent",
+  good: "text-good",
+  warn: "text-warn",
+  bad: "text-bad",
+  violet: "text-accent-2",
+};
 
 interface StatCardProps {
   value: string;
@@ -7,21 +15,14 @@ interface StatCardProps {
   tone?: Tone;
 }
 
-const toneValueClass: Record<Tone, string> = {
-  accent: "text-accent",
-  good: "text-good",
-  warn: "text-warn",
-  bad: "text-bad",
-};
-
 export function StatCard({ value, label, sub, tone = "accent" }: StatCardProps) {
   return (
-    <div className="rounded-xl border border-line bg-card px-4 sm:px-5 py-4 sm:py-5">
-      <div className={`text-2xl sm:text-3xl font-bold ${toneValueClass[tone]}`}>
+    <div className="border-l border-line pl-5 pr-3">
+      <div className={`text-3xl sm:text-4xl font-semibold tracking-tight tabular-nums ${toneValueClass[tone]}`}>
         {value}
       </div>
-      <div className="text-sm text-heading font-medium mt-1">{label}</div>
-      {sub && <div className="text-xs text-subtle mt-0.5">{sub}</div>}
+      <div className="text-sm text-heading mt-2">{label}</div>
+      {sub && <div className="text-xs text-subtle mt-1 leading-relaxed">{sub}</div>}
     </div>
   );
 }
@@ -34,8 +35,8 @@ interface MiniStatProps {
 
 export function MiniStat({ value, label, tone = "accent" }: MiniStatProps) {
   return (
-    <div className="rounded-xl border border-line bg-card px-4 py-3">
-      <div className={`text-lg sm:text-xl font-bold ${toneValueClass[tone]}`}>
+    <div className="border-l border-line pl-4">
+      <div className={`text-lg sm:text-xl font-semibold tabular-nums ${toneValueClass[tone]}`}>
         {value}
       </div>
       <div className="text-xs text-subtle mt-0.5">{label}</div>
