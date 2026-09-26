@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "tool": "downshift",
+  "tool_version": "0.1.0.dev0",
+  "generated_by": "ast",
+  "root": "supportdesk",
+  "summary": {
+    "files_scanned": 10,
+    "call_sites": 7,
+    "models_resolved": 0,
+    "prompts_resolved": 5
+  },
+  "warnings": [],
+  "call_sites": [
+    {
+      "id": "supportdesk/agent_assist.py::summarize_for_agent",
+      "file": "supportdesk/agent_assist.py",
+      "line": 21,
+      "function": "summarize_for_agent",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": null,
+        "source": "dynamic",
+        "expression": "model_for('summarize_for_agent')",
+        "env_var": null,
+        "defined_in": null
+      },
+      "end_line": 26,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "user",
+          "content": "Summarize this support ticket for a human support agent.\nWrite exactly 2 short sentences in English: what the customer wants,\nand the key details (order ID, dates, amounts) if present.\n\nSubject: {ticket['subject']}\nMessage:\n{ticket['body']}\n",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 120,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model is computed at runtime (model_for('summarize_for_agent'))"
+      ],
+      "purpose": null,
+      "output_contract": null,
+      "difficulty": null,
+      "grading": null,
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/agent_assist.py::draft_reply",
+      "file": "supportdesk/agent_assist.py",
+      "line": 32,
+      "function": "draft_reply",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": null,
+        "source": "dynamic",
+        "expression": "model_for('draft_reply')",
+        "env_var": null,
+        "defined_in": null
+      },
+      "end_line": 55,
+      "is_async": true,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a friendly, concise customer support agent for SupportDesk Store. Never promise refunds, credits, or delivery dates. Say a teammate will confirm next steps. Keep replies under 120 words.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "Reply language (ISO 639-1): {language}\nAgent summary: {summary}\n\nCustomer subject: {ticket['subject']}\nCustomer message:\n{ticket['body']}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 250,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model is computed at runtime (model_for('draft_reply'))"
+      ],
+      "purpose": null,
+      "output_contract": null,
+      "difficulty": null,
+      "grading": null,
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/extract.py::extract_order_info",
+      "file": "supportdesk/extract.py",
+      "line": 20,
+      "function": "extract_order_info",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": null,
+        "source": "dynamic",
+        "expression": "model_for('extract_order_info')",
+        "env_var": null,
+        "defined_in": null
+      },
+      "end_line": 29,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "Extract the order ID and the order date from the support ticket.\nOrder IDs look like ORD-12345.\nReturn JSON with exactly two keys: order_id and order_date.\norder_date must be YYYY-MM-DD. Use null for anything not stated explicitly.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "{ticket_text}",
+          "resolved": true
+        }
+      ],
+      "output_format": "json",
+      "temperature": 0.0,
+      "max_tokens": 60,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model is computed at runtime (model_for('extract_order_info'))"
+      ],
+      "purpose": null,
+      "output_contract": null,
+      "difficulty": null,
+      "grading": null,
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/llm.py::ask",
+      "file": "supportdesk/llm.py",
+      "line": 29,
+      "function": "ask",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": null,
+        "source": "dynamic",
+        "expression": "model_for(feature)",
+        "env_var": null,
+        "defined_in": null
+      },
+      "end_line": 34,
+      "is_async": false,
+      "messages": null,
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": null,
+      "via": null,
+      "callers": [
+        "supportdesk/triage.py::detect_sentiment",
+        "supportdesk/triage.py::tag_urgency"
+      ],
+      "notes": [
+        "model is computed at runtime (model_for(feature))",
+        "messages are built at runtime; the prompt template could not be recovered",
+        "shared helper called from 2 places; each caller may be a separate feature with its own prompt"
+      ],
+      "purpose": null,
+      "output_contract": null,
+      "difficulty": null,
+      "grading": null,
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/misc_utils.py::lang_of",
+      "file": "supportdesk/misc_utils.py",
+      "line": 27,
+      "function": "lang_of",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": null,
+        "source": "kwargs",
+        "expression": "**params",
+        "env_var": null,
+        "defined_in": null
+      },
+      "end_line": 27,
+      "is_async": false,
+      "messages": null,
+      "output_format": "text",
+      "temperature": null,
+      "max_tokens": null,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model is passed via **params and could not be resolved statically",
+        "messages are built at runtime; the prompt template could not be recovered"
+      ],
+      "purpose": null,
+      "output_contract": null,
+      "difficulty": null,
+      "grading": null,
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/policy.py::decide_refund",
+      "file": "supportdesk/policy.py",
+      "line": 21,
+      "function": "decide_refund",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": null,
+        "source": "dynamic",
+        "expression": "model_for('decide_refund')",
+        "env_var": null,
+        "defined_in": null
+      },
+      "end_line": 52,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a refund policy assistant. Apply the policy exactly as written. Count days carefully between the order date and today's date.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "Refund policy:\n{policy}\n\nToday's date: {ticket['created_at']}\nExtracted order info: {json.dumps(order_info)}\n\nTicket subject: {ticket['subject']}\nTicket message:\n{ticket['body']}\n\nReturn JSON with these keys, in this order:\n  \"reasoning\": 1-3 sentences applying the policy,\n  \"is_refund_request\": true or false,\n  \"eligible\": \"yes\", \"no\", \"store_credit\", or \"need_info\",\n  \"policy_section\": the section number you applied, e.g. \"2.1\".\nIf it is not a refund request, set eligible to \"no\" and policy_section to null.",
+          "resolved": true
+        }
+      ],
+      "output_format": "json",
+      "temperature": 0.0,
+      "max_tokens": 220,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model is computed at runtime (model_for('decide_refund'))"
+      ],
+      "purpose": null,
+      "output_contract": null,
+      "difficulty": null,
+      "grading": null,
+      "found_by": "ast"
+    },
+    {
+      "id": "supportdesk/triage.py::classify_category",
+      "file": "supportdesk/triage.py",
+      "line": 13,
+      "function": "classify_category",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": null,
+        "source": "dynamic",
+        "expression": "model_for('classify_category')",
+        "env_var": null,
+        "defined_in": null
+      },
+      "end_line": 29,
+      "is_async": false,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a support ticket classifier.",
+          "resolved": true
+        },
+        {
+          "role": "user",
+          "content": "Classify this support ticket into exactly one category: {', '.join(CATEGORIES)}.\nReply with the category name only.\n\nTicket:\n{ticket_text}",
+          "resolved": true
+        }
+      ],
+      "output_format": "text",
+      "temperature": 0.0,
+      "max_tokens": 5,
+      "via": null,
+      "callers": [
+        "supportdesk/pipeline.py::process_ticket"
+      ],
+      "notes": [
+        "model is computed at runtime (model_for('classify_category'))"
+      ],
+      "purpose": null,
+      "output_contract": null,
+      "difficulty": null,
+      "grading": null,
+      "found_by": "ast"
+    }
+  ]
+}

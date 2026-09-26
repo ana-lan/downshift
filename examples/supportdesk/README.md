@@ -59,3 +59,12 @@ To use a different file, set `SUPPORTDESK_MODELS_FILE` to its absolute path befo
 
 - `data/tickets.jsonl`: 40 synthetic tickets in English, Spanish, French, German, Portuguese, and Hindi, including refund edge cases (outside the window, digital goods, clearance, missing order ID).
 - `data/refund_policy.md`: the fictional policy the refund feature applies.
+
+## Scan snapshots
+
+- `downshift.scan.json`: ast scan before Phase 7 (7 call sites, 6 of 7 models resolved). The
+  audit, evals, results and report were measured against this version. A frozen copy of that
+  code lives in `tests/fixtures/supportdesk_v0/`.
+- `downshift.scan.after.json`: ast scan after model names moved to `models.yaml` (0 of 7 models
+  resolved). Static analysis can't follow a runtime config lookup. This is the gap the Bob
+  auditor is for.
