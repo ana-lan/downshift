@@ -1,6 +1,7 @@
 """Downshift command line interface."""
 
 import json
+import os
 from pathlib import Path
 
 import typer
@@ -23,7 +24,7 @@ from downshift.evals import (
     validate_eval_set,
 )
 from downshift.llm import LLMClient, LLMError, OpenAICompatClient
-from downshift.runner import ResultRow, Runner, RunSummary
+from downshift.runner import ResultRow, Runner, RunSummary, rescore_site, results_path
 from downshift.scanner import scan_path
 from downshift.schema import CallSite, ScanResult, SchemaError
 from downshift.scorer import Judge
@@ -296,6 +297,28 @@ def _make_client(provider_base_url: str, api_key: str) -> LLMClient:
     return OpenAICompatClient(provider_base_url, api_key)
 
 
+def _make_judge_client(base_url: str, api_key: str) -> LLMClient:
+    """Client for a hosted judge; retries rate limits (429) with backoff."""
+    from openai import OpenAI
+
+    return OpenAICompatClient(
+        base_url,
+        api_key,
+        client=OpenAI(base_url=base_url, api_key=api_key, timeout=120.0, max_retries=8),
+    )
+
+
+def _build_judge(
+    client: LLMClient, model: str, base_url: str | None, key_env: str, max_tokens: int
+) -> Judge:
+    if base_url is None:
+        return Judge(client, model, max_tokens=max_tokens)
+    api_key = os.environ.get(key_env, "")
+    if not api_key:
+        raise ValueError(f"judge endpoint {base_url} needs an API key in ${key_env}")
+    return Judge(_make_judge_client(base_url, api_key), model, max_tokens=max_tokens)
+
+
 @app.command()
 def evalgen(
     callsites: Path = typer.Option(..., "--callsites", help="Audit (or callsites) JSON."),
@@ -392,13 +415,32 @@ def run(
     warmup: bool = typer.Option(
         True, "--warmup/--no-warmup", help="One untimed call per model before timing."
     ),
+    judge_model: str | None = typer.Option(
+        None, "--judge-model", help="Judge model. Default: models.judge or baseline."
+    ),
+    judge_base_url: str | None = typer.Option(
+        None, "--judge-base-url", help="Separate OpenAI-compatible endpoint for the judge."
+    ),
+    judge_api_key_env: str = typer.Option(
+        "JUDGE_API_KEY", "--judge-api-key-env", help="Env var with the judge API key."
+    ),
+    judge_max_tokens: int = typer.Option(
+        1024, "--judge-max-tokens", min=16, help="Max tokens per judge reply."
+    ),
 ) -> None:
     """Run each call site's evals on the baseline and candidate models, and score them."""
     try:
         result = ScanResult.load(callsites)
         cfg = resolve_config(config, callsites.parent)
         client = _make_client(cfg.provider.base_url, cfg.provider.api_key())
-    except (SchemaError, ConfigError) as exc:
+        judge = _build_judge(
+            client,
+            judge_model or cfg.models.judge_model,
+            judge_base_url,
+            judge_api_key_env,
+            judge_max_tokens,
+        )
+    except (SchemaError, ConfigError, ValueError) as exc:
         _fail(str(exc))
         return
 
@@ -426,7 +468,7 @@ def run(
     runner = Runner(
         client,
         results_dir=results_dir,
-        judge=Judge(client, cfg.models.judge_model),
+        judge=judge,
         limit=limit,
         warmup=warmup,
         on_case=_case_mark,
@@ -501,6 +543,121 @@ def _print_run_summary(summaries: list[RunSummary]) -> None:
         )
         errors = f"[red]{s.errors}[/red]" if s.errors else "0"
         table.add_row(s.site_id, s.model, str(s.cases), rate, score, latency, tokens, errors)
+    Console().print(table)
+
+
+# --- rescore ------------------------------------------------------------------
+
+
+@app.command()
+def rescore(
+    callsites: Path = typer.Option(..., "--callsites", help="Audit (or callsites) JSON."),
+    evals: Path | None = typer.Option(
+        None, "--evals", help="Eval folder. Default: evals/ next to --callsites."
+    ),
+    results: Path | None = typer.Option(
+        None, "--results", help="Results folder. Default: results/ next to --callsites."
+    ),
+    model: list[str] = typer.Option(
+        [], "--model", help="Only these models' results. Default: baseline + candidates."
+    ),
+    site: list[str] = typer.Option([], "--site", help="Only this call site id. Repeatable."),
+    config: Path | None = typer.Option(None, "--config", "-c", help="Config file."),
+    judge_model: str | None = typer.Option(
+        None, "--judge-model", help="Judge model. Default: models.judge or baseline."
+    ),
+    judge_base_url: str | None = typer.Option(
+        None, "--judge-base-url", help="Separate OpenAI-compatible endpoint for the judge."
+    ),
+    judge_api_key_env: str = typer.Option(
+        "JUDGE_API_KEY", "--judge-api-key-env", help="Env var with the judge API key."
+    ),
+    judge_max_tokens: int = typer.Option(
+        1024, "--judge-max-tokens", min=16, help="Max tokens per judge reply."
+    ),
+) -> None:
+    """Re-grade saved outputs of judge-graded call sites with the configured judge."""
+    try:
+        result = ScanResult.load(callsites)
+        cfg = resolve_config(config, callsites.parent)
+        client = _make_client(cfg.provider.base_url, cfg.provider.api_key())
+        judge = _build_judge(
+            client,
+            judge_model or cfg.models.judge_model,
+            judge_base_url,
+            judge_api_key_env,
+            judge_max_tokens,
+        )
+    except (SchemaError, ConfigError, ValueError) as exc:
+        _fail(str(exc))
+        return
+
+    evals_dir = evals if evals is not None else callsites.parent / "evals"
+    results_dir = results if results is not None else callsites.parent / "results"
+    if not evals_dir.is_dir():
+        _fail(f"folder not found: {evals_dir}")
+        return
+
+    known = {s.id for s in result.call_sites}
+    unknown = [s for s in site if s not in known]
+    if unknown:
+        _fail(f"unknown call site id(s): {', '.join(unknown)}")
+        return
+    sites = [s for s in result.call_sites if s.grading == "judge" and (not site or s.id in site)]
+    tasks = _load_run_tasks(sites, evals_dir)
+    if not tasks:
+        _fail("nothing to rescore: no judge-graded call site with a valid eval file")
+        return
+
+    models = model or [cfg.models.baseline, *cfg.models.candidates]
+    typer.echo(f"judge: {judge.model}")
+    pairs: list[tuple[RunSummary, RunSummary]] = []
+    for name in models:
+        for call_site, eval_set in tasks:
+            if not results_path(results_dir, call_site.id, name).is_file():
+                typer.echo(f"skip {name} {call_site.id}: no results (run downshift run first)")
+                continue
+            typer.echo(f"{name}  {call_site.id}  ", nl=False)
+            before, after = rescore_site(
+                call_site,
+                eval_set,
+                name,
+                results_dir=results_dir,
+                judge=judge,
+                on_case=_case_mark,
+            )
+            pairs.append((before, after))
+            typer.echo(
+                f"  {before.passed}/{before.scored} -> {after.passed}/{after.scored} passed, "
+                f"{after.new} rescored"
+            )
+
+    _print_rescore_summary(pairs, judge.model)
+    errors = sum(after.errors for _, after in pairs)
+    typer.echo(f"{len(pairs)} site/model results rescored, {errors} errors. Saved in {results_dir}")
+    if errors:
+        raise typer.Exit(code=1)
+
+
+def _rate(summary: RunSummary) -> str:
+    if summary.pass_rate is None:
+        return "-"
+    return f"{summary.passed}/{summary.scored} ({summary.pass_rate:.0%})"
+
+
+def _print_rescore_summary(pairs: list[tuple[RunSummary, RunSummary]], judge_model: str) -> None:
+    table = Table(title=f"Rescored with {judge_model}")
+    table.add_column("Call site", overflow="fold")
+    table.add_column("Model", no_wrap=True)
+    table.add_column("Before", justify="right")
+    table.add_column("After", justify="right")
+    table.add_column("Rescored", justify="right")
+    table.add_column("Errors", justify="right")
+    for before, after in pairs:
+        errors = f"[red]{after.errors}[/red]" if after.errors else "0"
+        table.add_row(
+            after.site_id, after.model, _rate(before), _rate(after), str(after.new), errors
+        )
     Console().print(table)
 
 

@@ -52,6 +52,7 @@ class ResultRow:
     detail: str = ""
     judge_score: int | None = None
     error: str | None = None
+    judge_model: str | None = None
 
     @property
     def ok(self) -> bool:
@@ -169,14 +170,14 @@ class Runner:
         self.on_case = on_case
         self._warmed: set[str] = set()
 
-    def warm_up(self, model: str) -> None:
+    def warm_up(self, model: str, client: LLMClient | None = None) -> None:
         """One untimed call so model load time does not count as latency.
 
         LLMError propagates: a model that cannot answer this cannot run evals.
         """
         if not self.warmup or model in self._warmed:
             return
-        self.client.complete(model, WARMUP_MESSAGES, temperature=0.0, max_tokens=5)
+        (client or self.client).complete(model, WARMUP_MESSAGES, temperature=0.0, max_tokens=5)
         self._warmed.add(model)
 
     def cases_for(self, eval_set: EvalSet) -> list[EvalCase]:
@@ -190,7 +191,7 @@ class Runner:
         if todo:
             self.warm_up(model)
             if self.judge is not None and any(c.grading == "judge" for c in todo):
-                self.warm_up(self.judge.model)
+                self.warm_up(self.judge.model, self.judge.client)
         fields = graded_fields(site)
         for case in todo:
             row = self._run_case(site, eval_set, case, model, fields)
@@ -245,4 +246,67 @@ class Runner:
             passed=score.passed,
             detail=score.detail,
             judge_score=score.judge_score,
+            judge_model=self.judge.model if case.grading == "judge" and self.judge else None,
         )
+
+
+def rescore_site(
+    site: CallSite,
+    eval_set: EvalSet,
+    model: str,
+    *,
+    results_dir: Path,
+    judge: Judge,
+    on_case: Callable[[ResultRow], None] | None = None,
+) -> tuple[RunSummary, RunSummary]:
+    """Re-grade saved outputs of a judge-graded site with `judge`. Returns (before, after).
+
+    Model outputs are never regenerated. Rows already graded by this judge are
+    skipped, rows whose model call failed (no output) are left for `run`, and
+    judge failures become error rows that are retried on the next rescore.
+    """
+    path = results_path(results_dir, site.id, model)
+    rows = load_results(path)
+    case_ids = [c.id for c in eval_set.cases]
+    before = summarize_rows(site.id, model, case_ids, rows)
+    new = 0
+    for case in eval_set.cases:
+        row = rows.get(case.id)
+        if row is None or case.grading != "judge":
+            continue
+        if row.error is not None and not row.error.startswith("scoring failed"):
+            continue
+        if row.ok and row.judge_model == judge.model:
+            continue
+        messages = render_messages(site, eval_set.inputs_for(case))
+        try:
+            score = score_case(
+                case.grading, case.expected, row.output, prompt_messages=messages, judge=judge
+            )
+        except (LLMError, ValueError) as exc:
+            updated = replace(
+                row,
+                score=None,
+                passed=None,
+                detail="",
+                judge_score=None,
+                judge_model=judge.model,
+                error=f"scoring failed: {exc}",
+            )
+        else:
+            updated = replace(
+                row,
+                score=score.value,
+                passed=score.passed,
+                detail=score.detail,
+                judge_score=score.judge_score,
+                judge_model=judge.model,
+                error=None,
+            )
+        append_row(path, updated)
+        rows[case.id] = updated
+        new += 1
+        if on_case is not None:
+            on_case(updated)
+    after = summarize_rows(site.id, model, case_ids, rows, new=new)
+    return before, after
