@@ -9,7 +9,7 @@ from downshift.schema import ScanResult
 
 runner = CliRunner()
 ROOT = Path(__file__).resolve().parents[2]
-SUPPORTDESK = ROOT / "examples" / "supportdesk"
+SUPPORTDESK = ROOT / "tests" / "fixtures" / "supportdesk_v0"
 
 LLM_CALL = """
 def classify(text):
