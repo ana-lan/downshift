@@ -2,6 +2,7 @@
 
 import json
 import os
+import tempfile
 from pathlib import Path
 
 import typer
@@ -10,7 +11,9 @@ from rich.table import Table
 
 from downshift import __version__
 from downshift.audit import Comparison, compare_scans, validate_file
-from downshift.config import ConfigError, resolve_config
+from downshift.config import Config, ConfigError, resolve_config
+from downshift.diff import diff_for_config
+from downshift.diff import render_markdown as render_diff_markdown
 from downshift.evalgen import EvalGenSkip, generate_eval_set, write_eval_set
 from downshift.evals import (
     EVAL_SUFFIX,
@@ -23,6 +26,7 @@ from downshift.evals import (
     slug_for,
     validate_eval_set,
 )
+from downshift.gitref import GitError, extract_ref, repo_root
 from downshift.llm import LLMClient, LLMError, OpenAICompatClient
 from downshift.report import ReportError, build_report, render_markdown
 from downshift.runner import ResultRow, Runner, RunSummary, rescore_site, results_path
@@ -739,10 +743,73 @@ def report(
     )
 
 
+def _sites_at(root: Path, ref: str, rel: Path, dest: Path, cfg: Config) -> list[CallSite]:
+    target = extract_ref(root, ref, rel, dest)
+    if target is None:
+        return []
+    return list(scan_path(target, cfg.scan).call_sites)
+
+
+def _signed_dollars(value: float) -> str:
+    if abs(value) < 0.005:
+        return "$0.00"
+    return f"{'+' if value > 0 else '-'}${abs(value):,.2f}"
+
+
 @app.command()
-def diff() -> None:
+def diff(
+    path: Path = typer.Argument(Path("."), help="Directory to scan, inside a git repo."),
+    base: str = typer.Option("main", "--base", help="Git ref to compare against."),
+    head: str | None = typer.Option(
+        None, "--head", help="Git ref to compare. Default: the working tree."
+    ),
+    config: Path | None = typer.Option(
+        None,
+        "--config",
+        "-c",
+        help="Config file (used for both sides). Default: downshift.yaml in PATH.",
+    ),
+    out: Path | None = typer.Option(None, "--out", "-o", help="Write Markdown to this file."),
+    fail_above: float | None = typer.Option(
+        None,
+        "--fail-above",
+        min=0.0,
+        help="Exit 1 if the projected monthly increase is above this many dollars.",
+    ),
+) -> None:
     """Show the projected LLM cost change between two git refs."""
-    _not_implemented("diff")
+    try:
+        cfg = resolve_config(config, path)
+        root = repo_root(path)
+        rel = path.resolve().relative_to(root)
+        with tempfile.TemporaryDirectory() as tmp:
+            base_sites = _sites_at(root, base, rel, Path(tmp) / "base", cfg)
+            if head is None:
+                head_sites = list(scan_path(path, cfg.scan).call_sites)
+            else:
+                head_sites = _sites_at(root, head, rel, Path(tmp) / "head", cfg)
+    except (ConfigError, GitError, FileNotFoundError, ValueError) as exc:
+        _fail(str(exc))
+        return
+
+    cost = diff_for_config(base_sites, head_sites, cfg)
+    md = render_diff_markdown(cost, base=base, head=head or "working tree")
+    delta = _signed_dollars(cost.delta)
+
+    if out is None:
+        typer.echo(md, nl=False)
+    else:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(md, encoding="utf-8")
+        n = len(cost.added) + len(cost.changed) + len(cost.removed)
+        typer.echo(f"Wrote {out}: {n} call site change(s), projected {delta}/month.")
+
+    if fail_above is not None and cost.delta > fail_above:
+        typer.echo(
+            f"Projected increase {delta}/month is above --fail-above ${fail_above:,.2f}.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
 
 
 @app.command()
