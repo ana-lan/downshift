@@ -21,6 +21,7 @@ ADDED = "added"
 REMOVED = "removed"
 CHANGED = "changed"
 UNCHANGED = "unchanged"
+STATUS_SYMBOL = {ADDED: "+", CHANGED: "~", REMOVED: "-", UNCHANGED: "="}
 _ORDER = {ADDED: 0, CHANGED: 1, REMOVED: 2, UNCHANGED: 3}
 
 MARK_MODEL = "†"
@@ -314,10 +315,18 @@ def _row(site: SiteDiff) -> str:
     if b is None:
         monthly = _money(a.monthly if a else None)
     elif a is None:
-        monthly = f"{_money(b.monthly)} -> $0.00"
+        monthly = "$0.00"
     else:
         monthly = f"{_money(b.monthly)} -> {_money(a.monthly)}"
-    cells = [site.status, f"`{site.site_id}`", model, tokens, calls, monthly, _signed(site.delta)]
+    cells = [
+        STATUS_SYMBOL[site.status],
+        f"`{site.site_id}`",
+        model,
+        tokens,
+        calls,
+        monthly,
+        _signed(site.delta),
+    ]
     return "| " + " | ".join(cells) + " |"
 
 
@@ -343,11 +352,9 @@ def render_markdown(diff: CostDiff, *, base: str = "main", head: str = "HEAD") -
             f"({_signed(diff.delta)}{pct_text})**"
         )
         lines.append("")
-        lines.append(f"Call sites: {counts}.")
+        lines.append(f"Call sites: {counts}. Key: `+` added, `~` changed, `-` removed.")
         lines.append("")
-        lines.append(
-            "| Change | Call site | Model | Tokens/call (in + out) | Calls/day | Monthly | Delta |"
-        )
+        lines.append("|  | Call site | Model | In + out | Calls/day | Monthly | Delta |")
         lines.append("|---|---|---|---|---|---|---|")
         lines.extend(_row(s) for s in diff.sites if s.status != UNCHANGED)
         lines.append("")

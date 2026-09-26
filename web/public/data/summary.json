@@ -1,6 +1,6 @@
 {
   "project": "supportdesk",
-  "tool_version": "0.1.0.dev0",
+  "tool_version": "0.1.0",
   "baseline": "qwen2.5:7b",
   "candidates": [
     "qwen2.5:3b",
