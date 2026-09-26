@@ -20,5 +20,6 @@ pricing:
 
 volume:
   default_per_day: 20000
-  per_call_site:
-    "supportdesk/llm.py::ask": 40000   # shared helper: sentiment + urgency
+  # Every feature runs once per ticket, so all sites use the default.
+  # Override one with per_call_site, e.g.:
+  # per_call_site: {"supportdesk/triage.py::classify_category": 5000}
