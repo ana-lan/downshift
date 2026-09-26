@@ -40,13 +40,14 @@ def test_run_default_models_one_site(tmp_path: Path, fake: FakeLLMClient) -> Non
     assert sorted(p.name for p in folder.iterdir()) == [
         "qwen2.5-0.5b.jsonl",
         "qwen2.5-1.5b.jsonl",
+        "qwen2.5-3b.jsonl",
         "qwen2.5-7b.jsonl",
     ]
     rows = load_results(folder / "qwen2.5-7b.jsonl")
     assert len(rows) == 2
     assert all(r.ok for r in rows.values())
     assert "Run results" in result.output
-    assert "3 site/model runs, 0 errors" in result.output
+    assert "4 site/model runs, 0 errors" in result.output
 
 
 def test_run_resumes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

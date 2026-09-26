@@ -7,7 +7,7 @@ provider:
 
 models:
   baseline: "qwen2.5:7b"
-  candidates: ["qwen2.5:1.5b", "qwen2.5:0.5b"]
+  candidates: ["qwen2.5:3b", "qwen2.5:1.5b", "qwen2.5:0.5b"]
 
 quality_threshold: 0.95
 # A cheaper model must also pass at least this share of cases on its own.
@@ -15,6 +15,7 @@ min_pass_rate: 0.80
 
 pricing:
   "qwen2.5:7b":   { input: 2.50, output: 10.00, tier: premium }
+  "qwen2.5:3b":   { input: 0.40, output: 1.60,  tier: standard }
   "qwen2.5:1.5b": { input: 0.15, output: 0.60,  tier: budget }
   "qwen2.5:0.5b": { input: 0.10, output: 0.40,  tier: nano }
 
