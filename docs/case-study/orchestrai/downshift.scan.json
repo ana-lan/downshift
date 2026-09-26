@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "tool": "downshift",
+  "tool_version": "0.1.0.dev0",
+  "generated_by": "ast",
+  "root": "OrchestrAI",
+  "summary": {
+    "files_scanned": 28,
+    "call_sites": 1,
+    "models_resolved": 0,
+    "prompts_resolved": 0
+  },
+  "warnings": [],
+  "call_sites": [
+    {
+      "id": "ai.py::AI.generate_response",
+      "file": "ai.py",
+      "line": 39,
+      "function": "AI.generate_response",
+      "api": "openai.chat.completions",
+      "model": {
+        "value": null,
+        "source": "dynamic",
+        "expression": "self.model",
+        "env_var": null,
+        "defined_in": null
+      },
+      "end_line": 48,
+      "is_async": false,
+      "messages": null,
+      "output_format": "text",
+      "temperature": null,
+      "max_tokens": null,
+      "via": null,
+      "callers": [
+        "modules.py::chameleon",
+        "modules.py::create_readme",
+        "modules.py::debugger",
+        "modules.py::engineer",
+        "modules.py::modify_codebase"
+      ],
+      "notes": [
+        "model is computed at runtime (self.model)",
+        "messages are built at runtime; the prompt template could not be recovered",
+        "shared helper called from 5 places; each caller may be a separate feature with its own prompt"
+      ],
+      "purpose": null,
+      "output_contract": null,
+      "difficulty": null,
+      "grading": null,
+      "found_by": "ast"
+    }
+  ]
+}

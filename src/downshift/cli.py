@@ -12,7 +12,7 @@ from rich.table import Table
 from downshift import __version__
 from downshift.audit import Comparison, compare_scans, validate_file
 from downshift.config import Config, ConfigError, resolve_config
-from downshift.diff import diff_for_config
+from downshift.diff import DEFAULT_COMPLETION_TOKENS, diff_for_config
 from downshift.diff import render_markdown as render_diff_markdown
 from downshift.evalgen import EvalGenSkip, generate_eval_set, write_eval_set
 from downshift.evals import (
@@ -750,6 +750,50 @@ def _signed_dollars(value: float) -> str:
     if abs(value) < 0.005:
         return "$0.00"
     return f"{'+' if value > 0 else '-'}${abs(value):,.2f}"
+
+
+@app.command()
+def estimate(
+    file: Path = typer.Argument(..., help="Scan or audit JSON to price."),
+    base: Path | None = typer.Option(
+        None, "--base", help="Scan or audit JSON to compare against, e.g. the ast scan."
+    ),
+    config: Path | None = typer.Option(
+        None, "--config", "-c", help="Config file. Default: downshift.yaml next to FILE."
+    ),
+    completion_tokens: int = typer.Option(
+        DEFAULT_COMPLETION_TOKENS,
+        "--completion-tokens",
+        min=1,
+        help="Output tokens assumed for call sites with no max_tokens.",
+    ),
+    out: Path | None = typer.Option(None, "--out", "-o", help="Write Markdown to this file."),
+) -> None:
+    """Project monthly LLM cost from a scan or audit file. No evals needed."""
+    try:
+        cfg = resolve_config(config, file.parent)
+        head = ScanResult.load(file)
+        before = ScanResult.load(base) if base is not None else None
+    except (ConfigError, SchemaError, FileNotFoundError) as exc:
+        _fail(str(exc))
+        return
+
+    head_label = head.generated_by
+    base_label = before.generated_by if before is not None else "no call sites"
+    if before is not None and base_label == head_label:
+        base_label, head_label = "before", "after"
+
+    base_sites = list(before.call_sites) if before is not None else []
+    cost = diff_for_config(
+        base_sites, list(head.call_sites), cfg, default_completion=completion_tokens
+    )
+    md = render_diff_markdown(cost, base=base_label, head=head_label)
+    if out is None:
+        typer.echo(md, nl=False)
+        return
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(md)
+    typer.echo(f"Wrote {out}")
 
 
 @app.command()

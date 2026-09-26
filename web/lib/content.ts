@@ -81,6 +81,8 @@ export const BOB_TASKS = [
   { task: "Apply decisions", feature: "Agent mode, commit + PR", did: "models.yaml refactor, downgrades, opened PR #8", coins: "1.38" },
   { task: "Apply mid tier", feature: "Agent mode, commit + PR", did: "Switched two call sites to the 3B model, opened PR #11", coins: "0.27" },
   { task: "Review a bad PR", feature: "Ask mode, context mentions", did: "Found the hard-coded model and the max_tokens cost driver", coins: "0.07" },
+  { task: "Build the demo app", feature: "Agent mode, spec in context", did: "Scaffolded the Next.js app from web/SPEC.md", coins: "5.68" },
+  { task: "Audit a real repo", feature: "Custom mode + skill, context mentions", did: "OrchestrAI: 1 shared helper to 5 features, all models resolved", coins: "0.46" },
 ];
 
 export const DECISION_RULE = [
@@ -167,5 +169,56 @@ scan:
     "downshift audit command that runs the auditor with any configured LLM.",
     "Anthropic and Gemini runners, LiteLLM and LangChain detection, a JS/TS scanner.",
     "Eval inputs sampled from real logs with PII redaction.",
+  ],
+};
+
+export const CASE_STUDY = {
+  repo: "samshapley/OrchestrAI",
+  repoUrl: "https://github.com/samshapley/OrchestrAI",
+  license: "MIT",
+  commit: "866deaad457de2d9bef2c8fb227cfa52338c31e3",
+  audited: "Sep 26, 2026",
+  scope: "engineering_pipeline, the pipeline set in config.yml",
+  docUrl: `${REPO_URL}/blob/main/docs/case-study.md`,
+  coins: "0.46",
+  intro: [
+    "OrchestrAI builds software with a pipeline of LLM modules: plan, write code, debug, modify, write a README. Downshift had never seen it before.",
+    "Every module goes through one shared helper. The model comes from YAML and each prompt is loaded from a text file at runtime, so static analysis sees one call with nothing resolved.",
+  ],
+  metrics: [
+    { label: "Call sites", ast: 1, bob: 5 },
+    { label: "Models resolved", ast: 0, bob: 5 },
+    { label: "Prompts resolved", ast: 0, bob: 5 },
+    { label: "Enriched for evals", ast: 0, bob: 5 },
+  ],
+  bobFound: [
+    "Split the helper into 5 features, one per module that calls the LLM. code_planner has no function of its own and is dispatched through a generic fallback.",
+    "Resolved every model: gpt-4-0613 from config.yml for four modules, and a per-module override to gpt-3.5-turbo-16k for debugger in the pipeline YAML.",
+    "Rebuilt every prompt the way the app assembles it at runtime, including the two modules that build their own user message.",
+    "Found the volume multipliers: debugger retries up to 3 times per run, and modify_codebase loops until the user stops.",
+  ],
+  features: [
+    { name: "engineer", model: "gpt-4-0613", calls: 200, monthly: 587.7 },
+    { name: "modify_codebase", model: "gpt-4-0613", calls: 200, monthly: 575.64 },
+    { name: "code_planner", model: "gpt-4-0613", calls: 200, monthly: 566.1 },
+    { name: "create_readme", model: "gpt-4-0613", calls: 200, monthly: 560.16 },
+    { name: "debugger", model: "gpt-3.5-turbo-16k", calls: 600, monthly: 119.39 },
+  ],
+  staticMonthly: 540,
+  bobMonthly: 2408.99,
+  command: `downshift estimate docs/case-study/orchestrai/downshift.audit.json \\
+  --base docs/case-study/orchestrai/downshift.scan.json \\
+  -c docs/case-study/orchestrai/downshift.yaml --completion-tokens 1500`,
+  findings: [
+    "Static analysis alone underestimates this bill about 4.5x. It sees one call where the app makes five, seven with debugger retries.",
+    "95% of projected spend is four features on gpt-4-0613, one of OpenAI's most expensive legacy models.",
+    "The author already downshifted once, by hand: debugger runs on gpt-3.5-turbo-16k. On gpt-4-0613 it would cost about $1,734 a month instead of $119. Downshift makes that call per feature, backed by evals.",
+    "A third-party pricing tracker lists gpt-4-0613 for deprecation on Oct 23, 2026. Downshift's eval step is how you would pick each replacement.",
+  ],
+  limitations: [
+    "Projection, not a bill: OpenAI list prices (checked Sep 26, 2026) x assumed volume of 200 pipeline runs a day.",
+    "Output assumed at 1,500 tokens per call because no module sets max_tokens. Input counts only the static system prompts, so it is a floor.",
+    "No evals were run on this repo (paid API calls, $0 budget), so there are no downgrade recommendations here. The SupportDesk demo shows the full loop.",
+    "Only engineering_pipeline was audited. The four other pipelines use the same helper and pattern.",
   ],
 };
