@@ -6,7 +6,7 @@ from downshift.cli import app
 
 runner = CliRunner()
 COMMANDS = ["scan", "evalgen", "report", "diff", "dashboard"]
-NOT_IMPLEMENTED = ["report", "diff", "dashboard"]
+NOT_IMPLEMENTED = ["diff", "dashboard"]
 
 
 def test_help_lists_all_commands() -> None:
