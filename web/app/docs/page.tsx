@@ -1,6 +1,6 @@
-import { Panel } from "@/components/Panel";
+import type { ReactNode } from "react";
 import { CodeBlock } from "@/components/CodeBlock";
-import { DOCS } from "@/lib/content";
+import { ACTION_SNIPPET, DOCS } from "@/lib/content";
 
 const sections = [
   { id: "install", label: "Install" },
@@ -14,124 +14,118 @@ const sections = [
   { id: "future", label: "Future work" },
 ];
 
+function DocSection({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-24 border-t border-line pt-8 mt-8 first:border-t-0 first:pt-0 first:mt-0">
+      <h2 className="text-xl font-semibold tracking-tight text-heading mb-4">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function Bullets({ items }: { items: string[] }) {
+  return (
+    <ul className="space-y-2">
+      {items.map((item) => (
+        <li key={item} className="text-sm text-muted leading-relaxed border-l border-line pl-3">
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function DocsPage() {
   return (
-    <Panel>
-      <h1 className="text-2xl sm:text-3xl font-bold text-heading mb-2">Docs</h1>
-      <p className="text-muted text-sm mb-6">
-        Install, configure, run, and wire Downshift into CI.
-      </p>
+    <div className="pt-12 sm:pt-16 pb-8">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="h-px w-6 bg-brand" />
+        <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-accent-2">Docs</p>
+      </div>
+      <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-heading">
+        Install, configure, run, and wire Downshift into CI
+      </h1>
 
-      {/* TOC */}
-      <nav className="mb-8 rounded-xl border border-line bg-card px-4 py-3">
-        <p className="text-xs font-mono text-subtle uppercase mb-2">Contents</p>
-        <ul className="space-y-1">
-          {sections.map((s) => (
-            <li key={s.id}>
-              <a href={`#${s.id}`} className="text-sm text-accent hover:underline">
-                {s.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <div className="mt-10 grid gap-10 lg:grid-cols-[12rem_1fr]">
+        <aside className="hidden lg:block">
+          <nav className="sticky top-24">
+            <p className="text-[11px] font-mono uppercase tracking-wider text-subtle mb-3">
+              On this page
+            </p>
+            <ul className="space-y-2 border-l border-line">
+              {sections.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    className="-ml-px block border-l border-transparent pl-3 text-sm text-muted hover:text-heading hover:border-accent transition-colors"
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
 
-      {/* Install */}
-      <section id="install">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">Install</h2>
-        <CodeBlock code={DOCS.install} />
-      </section>
+        <div className="min-w-0 max-w-3xl">
+          <DocSection id="install" title="Install">
+            <CodeBlock code={DOCS.install} />
+            <p className="mt-3 text-sm text-muted">Python 3.10 or newer.</p>
+          </DocSection>
 
-      {/* Quickstart */}
-      <section id="quickstart">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">Quickstart</h2>
-        <CodeBlock code={DOCS.quickstart} />
-      </section>
+          <DocSection id="quickstart" title="Quickstart">
+            <CodeBlock code={DOCS.quickstart} />
+          </DocSection>
 
-      {/* Configuration */}
-      <section id="config">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">Configuration</h2>
-        <p className="text-muted text-sm mb-3">
-          Place a <code className="font-mono text-xs">downshift.yaml</code> next to the code you scan.
-        </p>
-        <CodeBlock code={DOCS.config} />
-      </section>
+          <DocSection id="config" title="Configuration">
+            <p className="text-sm text-muted mb-4">
+              Put a <code className="font-mono text-accent">downshift.yaml</code> next to the code
+              you scan. Every command also takes <code className="font-mono text-accent">-c</code>{" "}
+              to point at another file.
+            </p>
+            <CodeBlock code={DOCS.config} />
+          </DocSection>
 
-      {/* Commands */}
-      <section id="commands">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">Commands</h2>
-        <ul className="space-y-2">
-          {DOCS.commands.map((cmd) => (
-            <li key={cmd.name} className="flex gap-3 text-sm">
-              <code className="font-mono text-accent-fg bg-accent-bg border border-accent-line rounded px-2 py-0.5 text-xs shrink-0">
-                {cmd.name}
-              </code>
-              <span className="text-muted">{cmd.text}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+          <DocSection id="commands" title="Commands">
+            <ul className="divide-y divide-line-soft">
+              {DOCS.commands.map((cmd) => (
+                <li key={cmd.name} className="grid gap-1 py-2.5 sm:grid-cols-[8rem_1fr]">
+                  <code className="font-mono text-sm text-accent">{cmd.name}</code>
+                  <span className="text-sm text-muted">{cmd.text}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-subtle">
+              Run <code className="font-mono">downshift COMMAND --help</code> for every option.
+            </p>
+          </DocSection>
 
-      {/* GitHub Action */}
-      <section id="action">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">GitHub Action</h2>
-        <p className="text-muted text-sm mb-3">
-          Add to your repo to get a cost diff comment on every pull request.
-        </p>
-        <CodeBlock code={`- uses: ana-lan/downshift@v0.1.0\n  with:\n    path: .\n    fail-above: "500"\n    github-token: \${{ secrets.GITHUB_TOKEN }}`} />
-      </section>
+          <DocSection id="action" title="GitHub Action">
+            <p className="text-sm text-muted mb-4">
+              Add this workflow to get a projected cost diff comment on every pull request.
+              Remove <code className="font-mono text-accent">fail-above</code> to comment without
+              ever failing the check.
+            </p>
+            <CodeBlock code={ACTION_SNIPPET} label=".github/workflows/cost-diff.yml" />
+          </DocSection>
 
-      {/* Using Bob */}
-      <section id="bob">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">Using Bob</h2>
-        <ul className="space-y-2">
-          {DOCS.bob.map((item, i) => (
-            <li key={i} className="flex gap-2 text-sm text-muted">
-              <span className="text-accent shrink-0">&bull;</span>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+          <DocSection id="bob" title="Using Bob">
+            <Bullets items={DOCS.bob} />
+          </DocSection>
 
-      {/* Methodology */}
-      <section id="methodology">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">Methodology</h2>
-        <ul className="space-y-2">
-          {DOCS.methodology.map((item, i) => (
-            <li key={i} className="flex gap-2 text-sm text-muted">
-              <span className="text-accent shrink-0">&bull;</span>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+          <DocSection id="methodology" title="Methodology">
+            <Bullets items={DOCS.methodology} />
+          </DocSection>
 
-      {/* Limitations */}
-      <section id="limitations">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">Limitations</h2>
-        <ul className="space-y-2">
-          {DOCS.limitations.map((item, i) => (
-            <li key={i} className="flex gap-2 text-sm text-muted">
-              <span className="text-accent shrink-0">&bull;</span>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+          <DocSection id="limitations" title="Limitations">
+            <Bullets items={DOCS.limitations} />
+          </DocSection>
 
-      {/* Future work */}
-      <section id="future">
-        <h2 className="text-lg font-semibold text-heading mt-10 mb-3">Future work</h2>
-        <ul className="space-y-2">
-          {DOCS.future.map((item, i) => (
-            <li key={i} className="flex gap-2 text-sm text-muted">
-              <span className="text-accent shrink-0">&bull;</span>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </Panel>
+          <DocSection id="future" title="Future work">
+            <Bullets items={DOCS.future} />
+          </DocSection>
+        </div>
+      </div>
+    </div>
   );
 }

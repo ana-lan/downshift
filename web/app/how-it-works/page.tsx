@@ -4,100 +4,88 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { Disclaimer } from "@/components/Disclaimer";
 import { Badge } from "@/components/Badge";
 import { summary } from "@/lib/data";
-import { formatUsd } from "@/lib/format";
-import {
-  PIPELINE_STEPS,
-  PIPELINE_ASCII,
-  BOB_TASKS,
-  DECISION_RULE,
-} from "@/lib/content";
+import { formatUsd, formatPct } from "@/lib/format";
+import { PIPELINE_STEPS, PIPELINE_ASCII, BOB_TASKS, DECISION_RULE } from "@/lib/content";
+
+const td = "px-3 py-3 border-b border-line-soft";
 
 export default function HowItWorksPage() {
   return (
     <>
-      <Section eyebrow="PIPELINE" title="From call site to cost diff">
-        <ol className="space-y-4 mb-6">
+      <Section eyebrow="Pipeline" title="From call site to cost diff">
+        <ol className="grid gap-4 md:grid-cols-2">
           {PIPELINE_STEPS.map((step, i) => (
-            <li key={i} className="flex gap-4">
-              <span className="text-accent font-mono text-sm shrink-0 w-5 pt-0.5">{i + 1}.</span>
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="font-semibold text-heading text-sm">{step.title}</span>
-                  <Badge tone={step.who === "Bob" ? "accent" : "neutral"}>{step.who}</Badge>
-                  <code className="text-xs font-mono text-muted">{step.command}</code>
-                </div>
-                <p className="text-sm text-muted">{step.text}</p>
+            <li key={step.title} className="rounded-xl border border-line bg-card p-5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-sm text-accent">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="font-semibold text-heading">{step.title}</span>
+                <Badge tone={step.who === "Bob" ? "accent" : "neutral"}>{step.who}</Badge>
               </div>
+              <code className="mt-2 block text-xs font-mono text-subtle">{step.command}</code>
+              <p className="mt-2 text-sm text-muted leading-relaxed">{step.text}</p>
             </li>
           ))}
         </ol>
-        <CodeBlock code={PIPELINE_ASCII} label="Pipeline" />
+        <div className="mt-8">
+          <CodeBlock code={PIPELINE_ASCII} label="Data flow" />
+        </div>
       </Section>
 
-      <Section
-        eyebrow="WHERE BOB FITS"
-        title="Downshift is the toolkit, Bob is the brain"
-      >
-        <p className="text-muted text-sm mb-5">
-          Bob contributes at two points: the audit (resolving hidden models, splitting helpers) and writing evals. Everything else is deterministic Python.
+      <Section eyebrow="Where Bob fits" title="Downshift is the toolkit, Bob is the brain">
+        <p className="text-muted text-sm leading-relaxed max-w-3xl mb-6">
+          Bob does the parts that need real code understanding: auditing call sites, writing
+          evals, applying the decisions and reviewing pull requests. Scanning, running, grading,
+          costing and the CI diff are deterministic Python that runs without Bob.
         </p>
         <Table headers={["Task", "Bob feature", "What it did", "Bobcoins"]}>
-          {BOB_TASKS.map((task, i) => (
-            <tr key={i} className="hover:bg-card/50 transition-colors">
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-heading">
-                {task.task}
-              </td>
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted font-mono">
-                {task.feature}
-              </td>
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft text-muted">
-                {task.did}
-              </td>
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted font-mono">
-                {task.coins}
-              </td>
+          {BOB_TASKS.map((task) => (
+            <tr key={task.task} className="hover:bg-card/60 transition-colors">
+              <td className={`${td} whitespace-nowrap text-heading`}>{task.task}</td>
+              <td className={`${td} whitespace-nowrap text-accent-2`}>{task.feature}</td>
+              <td className={`${td} text-muted font-sans`}>{task.did}</td>
+              <td className={`${td} whitespace-nowrap text-muted tabular-nums`}>{task.coins}</td>
             </tr>
           ))}
         </Table>
       </Section>
 
-      <Section eyebrow="DECISION RULE" title="">
-        <ul className="space-y-2 mb-5">
-          {DECISION_RULE.map((rule, i) => (
-            <li key={i} className="flex gap-2 text-sm text-muted">
-              <span className="text-accent shrink-0">&bull;</span>
-              <span>{rule}</span>
+      <Section eyebrow="Decision rule" title="How a model gets picked">
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {DECISION_RULE.map((rule) => (
+            <li key={rule} className="text-sm text-muted leading-relaxed border-l border-line pl-3">
+              {rule}
             </li>
           ))}
         </ul>
-        <p className="text-xs text-subtle">
-          Threshold: {summary.threshold * 100}% &middot; Floor: {summary.min_pass_rate * 100}%
+        <p className="mt-5 text-xs font-mono text-subtle">
+          threshold {formatPct(summary.threshold, 0)} &middot; floor{" "}
+          {formatPct(summary.min_pass_rate, 0)} &middot; judge{" "}
+          {summary.judge_models[0] ?? "n/a"}
         </p>
       </Section>
 
-      <Section eyebrow="PRICING" title="">
-        <Table headers={["Model", "Tier", "Input $/1M", "Output $/1M"]}>
+      <Section eyebrow="Pricing" title="Illustrative prices">
+        <Table headers={["Model", "Tier", "Input / 1M tokens", "Output / 1M tokens"]}>
           {summary.pricing.map((p) => (
-            <tr key={p.model} className="hover:bg-card/50 transition-colors">
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-heading font-mono">
-                {p.model}
+            <tr key={p.model}>
+              <td className={`${td} whitespace-nowrap text-heading`}>{p.model}</td>
+              <td className={`${td} whitespace-nowrap text-muted`}>{p.tier ?? "n/a"}</td>
+              <td className={`${td} whitespace-nowrap text-muted tabular-nums`}>
+                {formatUsd(p.input_per_mtok)}
               </td>
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-                {p.tier ?? "n/a"}
-              </td>
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-                {p.input_per_mtok != null ? formatUsd(p.input_per_mtok) : "n/a"}
-              </td>
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-                {p.output_per_mtok != null ? formatUsd(p.output_per_mtok) : "n/a"}
+              <td className={`${td} whitespace-nowrap text-muted tabular-nums`}>
+                {formatUsd(p.output_per_mtok)}
               </td>
             </tr>
           ))}
         </Table>
-        <p className="text-xs text-subtle mt-3">
-          Illustrative tier prices that map local models to realistic API costs.
+        <p className="mt-4 text-xs text-subtle">
+          Tier prices that map the local models to realistic API costs. Replace them with your
+          provider&apos;s prices in downshift.yaml.
         </p>
-        <div className="mt-4">
+        <div className="mt-3">
           <Disclaimer />
         </div>
       </Section>

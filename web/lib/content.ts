@@ -88,16 +88,19 @@ export const DECISION_RULE = [
 
 export const DOCS = {
   install: `pip install downshift`,
-  quickstart: `# 1. find every LLM call site
+  quickstart: `# 1. find every LLM call site (writes path/to/repo/.downshift/callsites.json)
 downshift scan path/to/repo
 
-# 2. write evals (Bob Eval Writer mode, or downshift evalgen)
-# TODO(9c): evalgen and run commands
+# 2. write evals with any configured model (or the Bob Eval Writer mode)
+downshift evalgen --callsites path/to/repo/.downshift/callsites.json --out path/to/repo/.downshift/evals
 
-# 3. render the cost and quality report
-downshift report --callsites path/to/repo/downshift.audit.json --out report.md
+# 3. run the baseline and every cheaper model on the evals
+downshift run --callsites path/to/repo/.downshift/callsites.json
 
-# 4. projected cost change of your branch vs main
+# 4. cost and quality report with a decision per call site
+downshift report --callsites path/to/repo/.downshift/callsites.json --out report.md
+
+# 5. projected cost change of your branch vs main
 downshift diff path/to/repo --base main`,
   config: `# downshift.yaml, next to the code you scan
 version: 1

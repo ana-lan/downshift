@@ -5,90 +5,105 @@ import { audit } from "@/lib/data";
 import { auditRows } from "@/lib/select";
 import { AUDIT_INTRO, AUDIT_AFTER_NOTE } from "@/lib/content";
 
+const td = "px-3 py-3 border-b border-line-soft whitespace-nowrap";
+
 export default function AuditPage() {
   const rows = auditRows(audit);
 
   return (
     <>
-      <Section
-        eyebrow="STATIC ANALYSIS VS BOB"
-        title="Config-driven code blinds static analysis"
-      >
-        {AUDIT_INTRO.map((p, i) => (
-          <p key={i} className="text-muted text-sm mb-3">{p}</p>
-        ))}
-        <Table headers={["Metric", "ast scan", "Bob audit", "ast after refactor"]}>
-          {rows.map((row) => (
-            <tr key={row.key} className="hover:bg-card/50 transition-colors">
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-heading">
-                {row.label}
-              </td>
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-                {row.ast ?? "n/a"}
-              </td>
-              <td className={`px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap ${(row.audit ?? 0) > (row.ast ?? 0) ? "text-good" : "text-muted"}`}>
-                {row.audit ?? "n/a"}
-              </td>
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-                {row.astAfter ?? "n/a"}
-              </td>
-            </tr>
-          ))}
-        </Table>
-        <p className="text-xs text-subtle mt-4">{AUDIT_AFTER_NOTE}</p>
+      <Section eyebrow="Static analysis vs Bob" title="Config-driven code blinds static analysis">
+        <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+          <div className="space-y-3">
+            {AUDIT_INTRO.map((p, i) => (
+              <p key={i} className="text-muted text-sm leading-relaxed">
+                {p}
+              </p>
+            ))}
+            <p className="text-sm text-subtle leading-relaxed border-l border-accent-2 pl-3">
+              {AUDIT_AFTER_NOTE}
+            </p>
+          </div>
+          <Table headers={["Metric", "ast", "Bob", "ast after refactor"]}>
+            {rows.map((row) => (
+              <tr key={row.key}>
+                <td className={`${td} text-heading`}>{row.label}</td>
+                <td className={`${td} text-muted`}>{row.ast ?? "n/a"}</td>
+                <td
+                  className={`${td} ${
+                    (row.audit ?? 0) > (row.ast ?? 0) ? "text-accent-2" : "text-muted"
+                  }`}
+                >
+                  {row.audit ?? "n/a"}
+                </td>
+                <td className={`${td} text-muted`}>{row.astAfter ?? "n/a"}</td>
+              </tr>
+            ))}
+          </Table>
+        </div>
       </Section>
 
-      <Section eyebrow="WHAT BOB CHANGED" title="">
-        <ul className="space-y-2">
+      <Section eyebrow="Changes" title="What the auditor changed">
+        <ul className="divide-y divide-line-soft">
           {audit.changes.map((change) => (
-            <li key={change.id + change.kind} className="flex flex-wrap items-start gap-2 text-sm">
-              <Badge tone="accent">{change.kind}</Badge>
-              <span className="font-mono text-heading">{change.id}</span>
-              <span className="text-muted">{change.detail}</span>
+            <li
+              key={change.id + change.kind}
+              className="grid gap-2 py-3 sm:grid-cols-[7rem_1fr] sm:items-baseline"
+            >
+              <span>
+                <Badge tone="accent">{change.kind}</Badge>
+              </span>
+              <span>
+                <span className="font-mono text-sm text-heading break-all">{change.id}</span>
+                <span className="block text-sm text-muted mt-0.5">{change.detail}</span>
+              </span>
             </li>
           ))}
         </ul>
       </Section>
 
-      <Section eyebrow="CALL SITES" title="">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <p className="text-xs font-mono text-subtle uppercase mb-3">
-              ast scan ({audit.ast_sites.length})
+      <Section eyebrow="Call sites" title="Side by side">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-xl border border-line bg-card p-5">
+            <p className="text-[11px] font-mono uppercase tracking-wider text-subtle mb-4">
+              ast scan &middot; {audit.ast_sites.length} sites
             </p>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {audit.ast_sites.map((site) => (
-                <li key={site.id} className="text-sm">
-                  <span className="font-mono text-heading">{site.id}</span>
+                <li key={site.id}>
+                  <span className="font-mono text-sm text-heading break-all">{site.id}</span>
                   <div className="text-xs text-muted mt-0.5">
                     {site.model ? (
                       <span className="font-mono">{site.model}</span>
                     ) : (
-                      <span className="text-warn">unresolved</span>
-                    )}
-                    {" "}&middot;{" "}
-                    prompt {site.prompt_resolved ? "resolved" : "not resolved"}
+                      <span className="text-warn">model unresolved</span>
+                    )}{" "}
+                    &middot; prompt {site.prompt_resolved ? "resolved" : "not resolved"}
                   </div>
                 </li>
               ))}
             </ul>
           </div>
-          <div>
-            <p className="text-xs font-mono text-subtle uppercase mb-3">
-              Bob audit ({audit.audit_sites.length})
+          <div className="rounded-xl border border-line bg-card p-5">
+            <p className="text-[11px] font-mono uppercase tracking-wider text-subtle mb-4">
+              Bob audit &middot; {audit.audit_sites.length} sites
             </p>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {audit.audit_sites.map((site) => (
                 <li
                   key={site.id}
-                  className={`text-sm ${site.found_by === "bob" ? "border-l-2 border-accent pl-3" : ""}`}
+                  className={site.found_by === "bob" ? "border-l-2 border-accent-2 pl-3" : ""}
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-heading">{site.id}</span>
-                    <FoundByBadge foundBy={site.found_by} />
+                    <span className="font-mono text-sm text-heading break-all">{site.id}</span>
+                    {site.found_by === "bob" && <FoundByBadge foundBy="bob" />}
                   </div>
                   <div className="text-xs text-muted mt-0.5">
-                    {site.via && <span>via <span className="font-mono">{site.via}</span> &middot; </span>}
+                    {site.via && (
+                      <>
+                        via <span className="font-mono">{site.via}</span> &middot;{" "}
+                      </>
+                    )}
                     <span className="font-mono">{site.model ?? "unresolved"}</span>
                   </div>
                 </li>
