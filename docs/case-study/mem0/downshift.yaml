@@ -1,0 +1,33 @@
+# Downshift config for the mem0 case study (default setup: OpenAI provider).
+# Prices: OpenAI list prices per 1M tokens (checked Sep 26, 2026).
+# Volume is an assumption for an app built on mem0:
+#   10,000 add() calls/day and 10,000 searches/day with the LLM reranker,
+#   10 candidate documents per search (the reranker calls the LLM once per document),
+#   100 procedural memories/day, 500 images/day with vision enabled.
+# The static-only view sees one OpenAI helper; a reviewer would price it at one call
+# per memory operation (add + search). Other provider adapters are not used in the
+# default setup, so they get 0 calls.
+version: 1
+
+provider:
+  base_url: "https://api.openai.com/v1"
+
+models:
+  baseline: "gpt-5-mini"
+  candidates: ["gpt-5-nano"]
+
+quality_threshold: 0.95
+min_pass_rate: 0.80
+
+pricing:
+  "gpt-5-mini": { input: 0.25, output: 2.00, tier: standard }
+  "gpt-5-nano": { input: 0.05, output: 0.40, tier: nano }
+
+volume:
+  default_per_day: 0
+  per_call_site:
+    "mem0/llms/openai.py::OpenAILLM.generate_response": 20000
+    "mem0/memory/main.py::Memory._add_to_vector_store": 10000
+    "mem0/reranker/llm_reranker.py::LLMReranker.rerank": 100000
+    "mem0/memory/main.py::Memory._create_procedural_memory": 100
+    "mem0/memory/utils.py::get_image_description": 500

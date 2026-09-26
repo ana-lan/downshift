@@ -61,7 +61,7 @@ def scan_path(root: Path, scan_config: ScanConfig | None = None) -> ScanResult:
     for path, rel in iter_python_files(root, scan_config):
         files_scanned += 1
         try:
-            source = path.read_text(encoding="utf-8")
+            source = path.read_text(encoding="utf-8-sig")
         except (OSError, UnicodeDecodeError) as exc:
             warnings.append(f"{rel}: could not read file, skipped ({exc})")
             continue
@@ -192,6 +192,11 @@ class _CallFinder(ast.NodeVisitor):
         self.found: list[_FoundCall] = []
         self.calls: list[tuple[str, str]] = []
         self._awaited: set[int] = set()
+        self.sdks: frozenset[str] = frozenset()
+
+    def visit_Module(self, node: ast.Module) -> None:
+        self.sdks = _imported_sdks(node)
+        self.generic_visit(node)
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self.scope.append(node.name)
@@ -223,7 +228,7 @@ class _CallFinder(ast.NodeVisitor):
         elif isinstance(node.func, ast.Attribute):
             self.calls.append((qualname, node.func.attr))
 
-        api = _match_api(node)
+        api = _match_api(node, self.sdks)
         if api is not None:
             func = self.functions[-1] if self.functions else None
             self.found.append(_FoundCall(node, api, qualname, func, id(node) in self._awaited))
@@ -240,14 +245,33 @@ def _attribute_chain(node: ast.expr) -> list[str]:
     return parts
 
 
-def _match_api(call: ast.Call) -> str | None:
+def _match_api(call: ast.Call, sdks: frozenset[str]) -> str | None:
     chain = _attribute_chain(call.func)
     for suffix, api, needs_model in API_PATTERNS:
         if len(chain) >= len(suffix) and tuple(chain[-len(suffix) :]) == suffix:
-            if needs_model and not any(kw.arg == "model" for kw in call.keywords):
+            if needs_model and not _has_model_arg(call, api, sdks):
                 return None
             return api
     return None
+
+
+def _has_model_arg(call: ast.Call, api: str, sdks: frozenset[str]) -> bool:
+    """model= is given, or a **kwargs splat in a file that imports this API's SDK."""
+    if any(kw.arg == "model" for kw in call.keywords):
+        return True
+    has_splat = any(kw.arg is None for kw in call.keywords)
+    return has_splat and api.split(".")[0] in sdks
+
+
+def _imported_sdks(tree: ast.Module) -> frozenset[str]:
+    """Top-level packages imported anywhere in the file, including inside try blocks."""
+    roots: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            roots.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            roots.add(node.module.split(".")[0])
+    return frozenset(roots)
 
 
 # --- reading call arguments ---------------------------------------------------
