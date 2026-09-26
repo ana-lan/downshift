@@ -321,8 +321,9 @@ def test_real_decide_refund_keeps_and_flags_floor(real) -> None:
     assert d.baseline_pass_rate == pytest.approx(10 / 25)
 
 
-def test_real_sentiment_downgrades_at_0_90(real) -> None:
-    assert real_decision(real, "detect_sentiment").action == KEEP
+def test_real_sentiment_downgrades_to_3b(real) -> None:
+    assert real_decision(real, "detect_sentiment").model == "qwen2.5:3b"
+    # at 0.90 the cheaper 0.5b (18/22 vs 20/22) also qualifies and wins on cost
     d = real_decision(real, "detect_sentiment", threshold=0.90)
     assert d.model == "qwen2.5:0.5b"
 
@@ -334,9 +335,24 @@ def test_real_judge_average_uses_new_judge(real) -> None:
     assert d.stats["qwen2.5:7b"].avg_judge_score == pytest.approx(61 / 22)
 
 
-def test_real_only_lang_of_downgrades(real) -> None:
+def test_real_downgrades(real) -> None:
     _, scan = real
     downgraded = [
         site.function for site in scan.call_sites if real_decision(real, site.function).downgraded
     ]
-    assert downgraded == ["lang_of"]
+    assert sorted(downgraded) == ["detect_sentiment", "extract_order_info", "lang_of"]
+
+
+def test_real_extract_goes_to_3b(real) -> None:
+    d = real_decision(real, "extract_order_info")
+    assert d.model == "qwen2.5:3b"
+    assert check(d, "qwen2.5:1.5b").reason.startswith("keeps 85%")
+
+
+def test_real_floor_blocks_refund_3b(real) -> None:
+    # 3b ties the 7b at 10/25 (ratio 1.0), but 40% is below the 80% floor
+    d = real_decision(real, "decide_refund")
+    c = check(d, "qwen2.5:3b")
+    assert c.ratio == pytest.approx(1.0)
+    assert "below the floor 80%" in c.reason
+    assert d.action == KEEP

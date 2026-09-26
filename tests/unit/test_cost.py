@@ -229,5 +229,9 @@ def test_real_supportdesk_cost() -> None:
     assert len(s.sites) == 8
     assert all(c.calls_per_day == 20_000 for c in s.sites)  # stale llm.py::ask entry gone
     saving = [c.site_id for c in s.sites if (c.savings or 0) > 0]
-    assert saving == ["supportdesk/misc_utils.py::lang_of"]
+    assert sorted(saving) == [
+        "supportdesk/extract.py::extract_order_info",
+        "supportdesk/misc_utils.py::lang_of",
+        "supportdesk/triage.py::detect_sentiment",
+    ]
     assert 0 < s.savings < s.before_monthly
