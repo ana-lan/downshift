@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import os
 from typing import Any
 
-from .llm import DEFAULT_MODEL, async_client, client
-
-SUMMARY_MODEL = os.environ.get("SUMMARY_MODEL", "qwen2.5:7b")
+from .llm import async_client, client
+from .models import model_for
 
 
 def summarize_for_agent(ticket: dict[str, Any]) -> str:
@@ -21,7 +19,7 @@ Message:
 {ticket["body"]}
 """
     response = client.chat.completions.create(
-        model=SUMMARY_MODEL,
+        model=model_for("summarize_for_agent"),
         messages=[{"role": "user", "content": prompt}],
         temperature=0,
         max_tokens=120,
@@ -32,7 +30,7 @@ Message:
 async def draft_reply(ticket: dict[str, Any], summary: str, language: str) -> str:
     """Draft a reply to the customer, in the customer's language."""
     response = await async_client.chat.completions.create(
-        model=DEFAULT_MODEL,
+        model=model_for("draft_reply"),
         messages=[
             {
                 "role": "system",

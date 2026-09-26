@@ -36,7 +36,24 @@ python -m supportdesk --ticket T001
 python -m supportdesk --limit 3
 ```
 
-Environment variables: `SUPPORTDESK_LLM_BASE_URL` (default `http://localhost:11434/v1`), `SUPPORTDESK_LLM_API_KEY`, `SUPPORTDESK_MODEL`, `SUMMARY_MODEL`.
+Environment variables: `SUPPORTDESK_LLM_BASE_URL` (default `http://localhost:11434/v1`), `SUPPORTDESK_LLM_API_KEY`.
+
+## Models
+
+`models.yaml` (in this directory) controls which model each feature uses. The assignments were chosen from `downshift.report.md`:
+
+| Feature | Model |
+|---|---|
+| `classify_category` | `qwen2.5:7b` |
+| `detect_sentiment` | `qwen2.5:7b` |
+| `tag_urgency` | `qwen2.5:7b` |
+| `lang_of` | `qwen2.5:1.5b` |
+| `extract_order_info` | `qwen2.5:7b` |
+| `decide_refund` | `qwen2.5:7b` |
+| `summarize_for_agent` | `qwen2.5:7b` |
+| `draft_reply` | `qwen2.5:7b` |
+
+To use a different file, set `SUPPORTDESK_MODELS_FILE` to its absolute path before running the app.
 
 ## Data
 
