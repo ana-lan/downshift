@@ -2,155 +2,170 @@ import type { CallSite, SiteEvals } from "@/lib/types";
 import { Section } from "@/components/Panel";
 import { Table } from "@/components/Table";
 import { CodeBlock } from "@/components/CodeBlock";
-import { PassBadge } from "@/components/Badge";
+import { Badge, PassBadge } from "@/components/Badge";
 import {
   formatPct,
   formatNumber,
   formatSeconds,
   formatUsdPerCall,
   formatValue,
+  shortModel,
 } from "@/lib/format";
 
-interface ModelsTableProps {
-  site: CallSite;
-  showJudge: boolean;
+const td = "px-3 py-3 border-b border-line-soft whitespace-nowrap";
+
+function dotClass(passed: boolean | null | undefined): string {
+  if (passed === true) return "bg-good";
+  if (passed === false) return "bg-bad/70";
+  return "bg-line";
 }
 
-export function ModelsTable({ site, showJudge }: ModelsTableProps) {
+export function ModelsTable({ site, showJudge }: { site: CallSite; showJudge: boolean }) {
+  const reasons = site.models.filter((m) => !m.is_baseline && m.check);
   return (
-    <Section eyebrow="MODELS" title="">
+    <Section eyebrow="Models" title="How each model did">
       <Table
         headers={[
           "Model",
           "Pass rate",
-          "Passed",
-          "Mean score",
           ...(showJudge ? ["Judge avg"] : []),
-          "Prompt tok",
-          "Completion tok",
+          "Tokens in / out",
           "Latency",
-          "Cost/call",
+          "Cost / call",
           "vs baseline",
           "Check",
         ]}
       >
         {site.models.map((m) => (
-          <tr key={m.model} className="hover:bg-card/50 transition-colors">
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-heading">
-              <span className="font-mono">{m.model}</span>
-              {m.tier && <span className="ml-1 text-subtle text-xs">({m.tier})</span>}
-              {m.is_baseline && <span className="ml-1 text-xs text-subtle">baseline</span>}
-              {m.chosen && !m.is_baseline && <span className="ml-1 text-xs text-good">chosen</span>}
+          <tr key={m.model} className="hover:bg-card/60 transition-colors">
+            <td className={`${td} text-heading`}>
+              <div className="flex items-center gap-2">
+                <span>{m.model}</span>
+                {m.is_baseline && <Badge>baseline</Badge>}
+                {m.chosen && !m.is_baseline && <Badge tone="good">chosen</Badge>}
+              </div>
+              {m.tier && <div className="text-[11px] text-subtle mt-0.5">{m.tier} tier</div>}
             </td>
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
+            <td className={`${td} tabular-nums ${m.chosen ? "text-good" : "text-muted"}`}>
               {formatPct(m.pass_rate)}
-            </td>
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-              {m.passed != null && m.cases != null ? `${m.passed}/${m.cases}` : "n/a"}
-            </td>
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-              {m.mean_score != null ? m.mean_score.toFixed(4) : "n/a"}
+              {m.passed != null && m.cases != null && (
+                <span className="text-subtle">
+                  {" "}
+                  ({m.passed}/{m.cases})
+                </span>
+              )}
             </td>
             {showJudge && (
-              <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-                {m.avg_judge_score != null ? m.avg_judge_score.toFixed(2) : "n/a"}
+              <td className={`${td} tabular-nums text-muted`}>
+                {m.avg_judge_score != null ? `${m.avg_judge_score.toFixed(2)} / 5` : "n/a"}
               </td>
             )}
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-              {formatNumber(m.avg_prompt_tokens, 1)}
+            <td className={`${td} tabular-nums text-muted`}>
+              {formatNumber(m.avg_prompt_tokens)} / {formatNumber(m.avg_completion_tokens)}
             </td>
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-              {formatNumber(m.avg_completion_tokens, 1)}
-            </td>
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-              {formatSeconds(m.avg_latency_s)}
-            </td>
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
-              {formatUsdPerCall(m.cost_per_call)}
-            </td>
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap text-muted">
+            <td className={`${td} tabular-nums text-muted`}>{formatSeconds(m.avg_latency_s)}</td>
+            <td className={`${td} tabular-nums text-muted`}>{formatUsdPerCall(m.cost_per_call)}</td>
+            <td className={`${td} tabular-nums text-muted`}>
               {m.check?.ratio != null ? formatPct(m.check.ratio) : "n/a"}
             </td>
-            <td className="px-3 sm:px-4 py-2 border-b border-line-soft whitespace-nowrap">
-              {m.is_baseline
-                ? <span className="text-subtle text-xs">n/a</span>
-                : <PassBadge passed={m.check?.passed ?? null} />}
+            <td className={td}>
+              {m.is_baseline ? (
+                <span className="text-xs text-subtle">n/a</span>
+              ) : (
+                <PassBadge passed={m.check?.passed ?? null} />
+              )}
             </td>
           </tr>
         ))}
       </Table>
-      <ul className="mt-4 space-y-1">
-        {site.models.filter((m) => !m.is_baseline && m.check).map((m) => (
-          <li key={m.model} className="text-xs text-muted">
-            <span className="font-mono text-subtle">{m.model}:</span> {m.check!.reason}
-          </li>
-        ))}
-      </ul>
+      {reasons.length > 0 && (
+        <ul className="mt-6 grid gap-2 sm:grid-cols-2">
+          {reasons.map((m) => (
+            <li key={m.model} className="text-sm text-muted border-l border-line pl-3">
+              <span className="font-mono text-heading">{shortModel(m.model)}</span>{" "}
+              {m.check?.reason}
+            </li>
+          ))}
+        </ul>
+      )}
     </Section>
   );
 }
 
-interface EvalExamplesProps {
-  siteEvals: SiteEvals;
-}
-
-export function EvalExamples({ siteEvals }: EvalExamplesProps) {
+export function EvalExamples({ siteEvals }: { siteEvals: SiteEvals }) {
   return (
     <Section
-      eyebrow="EVAL EXAMPLES"
-      title={`${siteEvals.examples.length} of ${siteEvals.cases} cases`}
+      eyebrow="Eval examples"
+      title={`${siteEvals.examples.length} of ${siteEvals.cases} cases, every model side by side`}
     >
       <div className="space-y-3">
         {siteEvals.examples.map((ex, i) => (
-          <details key={ex.id} open={i === 0} className="rounded-xl border border-line bg-card overflow-hidden">
-            <summary className="px-4 py-3 cursor-pointer flex flex-wrap items-center gap-3 list-none">
+          <details
+            key={ex.id}
+            open={i === 0}
+            className="group rounded-lg border border-line bg-card"
+          >
+            <summary className="px-4 py-3 cursor-pointer list-none flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="text-subtle transition-transform group-open:rotate-90">&#8250;</span>
               <span className="font-mono text-sm text-heading">{ex.id}</span>
-              <div className="flex flex-wrap gap-1">
-                {siteEvals.models.map((model) => {
-                  const out = ex.outputs[model];
-                  return (
-                    <span key={model} className="flex items-center gap-1 text-xs text-muted">
-                      <span className="font-mono">{model}</span>
-                      <PassBadge passed={out?.passed ?? null} />
-                    </span>
-                  );
-                })}
-              </div>
+              <span className="flex flex-wrap gap-3">
+                {siteEvals.models.map((model) => (
+                  <span
+                    key={model}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-mono text-muted"
+                  >
+                    <span className={`h-2 w-2 rounded-full ${dotClass(ex.outputs[model]?.passed)}`} />
+                    {shortModel(model)}
+                  </span>
+                ))}
+              </span>
             </summary>
-            <div className="px-4 pb-4 border-t border-line">
-              <div className="mt-3 mb-4">
-                <p className="text-xs font-mono text-subtle uppercase mb-2">Inputs</p>
-                <dl className="space-y-2">
-                  {Object.entries(ex.inputs).map(([k, v]) => (
-                    <div key={k}>
-                      <dt className="text-xs font-mono text-subtle">{k}</dt>
-                      <dd className="text-xs text-muted whitespace-pre-wrap mt-0.5">{formatValue(v)}</dd>
-                    </div>
-                  ))}
-                </dl>
+            <div className="border-t border-line px-4 pb-5">
+              <div className="mt-4 grid gap-6 lg:grid-cols-2">
+                <div>
+                  <p className="text-[11px] font-mono uppercase tracking-wider text-subtle mb-2">
+                    Inputs
+                  </p>
+                  <dl className="space-y-3">
+                    {Object.entries(ex.inputs).map(([k, v]) => (
+                      <div key={k}>
+                        <dt className="text-[11px] font-mono text-accent">{k}</dt>
+                        <dd className="mt-0.5 text-sm text-text whitespace-pre-wrap">
+                          {formatValue(v)}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+                <div>
+                  <CodeBlock code={formatValue(ex.expected)} label="Expected" />
+                  {ex.notes && <p className="mt-3 text-xs text-subtle leading-relaxed">{ex.notes}</p>}
+                </div>
               </div>
-              <div className="mb-4">
-                <p className="text-xs font-mono text-subtle uppercase mb-2">Expected</p>
-                <CodeBlock code={formatValue(ex.expected)} />
-              </div>
-              {ex.notes && <p className="text-xs text-subtle mb-4">{ex.notes}</p>}
-              <p className="text-xs font-mono text-subtle uppercase mb-2">Outputs</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <p className="mt-6 text-[11px] font-mono uppercase tracking-wider text-subtle mb-2">
+                Outputs
+              </p>
+              <div className="grid gap-3 md:grid-cols-2">
                 {siteEvals.models.map((model) => {
                   const out = ex.outputs[model];
                   return (
-                    <div key={model} className="rounded-lg border border-line bg-panel p-3">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div key={model} className="rounded-lg border border-line bg-panel p-3.5">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className="font-mono text-xs text-heading">{model}</span>
                         <PassBadge passed={out?.passed ?? null} />
-                        {out?.score != null && <span className="text-xs text-subtle">score {out.score}</span>}
-                        {out?.judge_score != null && <span className="text-xs text-subtle">judge {out.judge_score}/5</span>}
+                        {out?.judge_score != null && (
+                          <span className="text-[11px] text-subtle">judge {out.judge_score}/5</span>
+                        )}
                       </div>
                       {out ? (
                         <>
-                          <div className="text-xs font-mono text-muted whitespace-pre-wrap mb-2">{out.output}</div>
-                          {out.detail && <p className="text-xs text-subtle">{out.detail}</p>}
-                          {out.error && <p className="text-xs text-bad">{out.error}</p>}
+                          <div className="text-xs font-mono text-text whitespace-pre-wrap">
+                            {out.output}
+                          </div>
+                          {out.detail && (
+                            <p className="mt-2 text-[11px] text-subtle leading-relaxed">{out.detail}</p>
+                          )}
+                          {out.error && <p className="mt-2 text-[11px] text-bad">{out.error}</p>}
                         </>
                       ) : (
                         <p className="text-xs text-subtle">No output</p>
@@ -167,63 +182,47 @@ export function EvalExamples({ siteEvals }: EvalExamplesProps) {
   );
 }
 
-interface EvalGridProps {
-  siteEvals: SiteEvals;
-}
-
-export function EvalGrid({ siteEvals }: EvalGridProps) {
+export function EvalGrid({ siteEvals }: { siteEvals: SiteEvals }) {
+  const total = siteEvals.grid.length;
   return (
-    <Section eyebrow="ALL CASES" title="">
-      <div className="overflow-x-auto">
-        <table className="text-xs font-mono">
-          <thead>
-            <tr>
-              <th className="text-left px-2 py-1 text-subtle font-normal whitespace-nowrap">Case</th>
-              {siteEvals.models.map((m) => (
-                <th key={m} className="px-2 py-1 text-subtle font-normal whitespace-nowrap">{m}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {siteEvals.grid.map((row) => (
-              <tr key={row.id}>
-                <td className="px-2 py-1 text-heading">{row.id}</td>
-                {siteEvals.models.map((model) => {
-                  const passed = row.passed[model];
-                  const colorClass =
-                    passed === true ? "bg-good" :
-                    passed === false ? "bg-bad" :
-                    "bg-line";
+    <Section eyebrow="All cases" title={`Pass and fail across all ${total} cases`}>
+      <div className="space-y-4">
+        {siteEvals.models.map((model) => {
+          const passed = siteEvals.grid.filter((r) => r.passed[model] === true).length;
+          return (
+            <div key={model} className="grid gap-2 sm:grid-cols-[9rem_1fr_4rem] sm:items-center">
+              <span className="font-mono text-sm text-heading">{model}</span>
+              <div className="flex flex-wrap gap-1">
+                {siteEvals.grid.map((row) => {
+                  const p = row.passed[model];
+                  const label = p === true ? "pass" : p === false ? "fail" : "n/a";
                   return (
-                    <td key={model} className="px-2 py-1 text-center">
-                      <span
-                        className={`inline-block w-4 h-4 rounded-sm ${colorClass}`}
-                        title={`${row.id} \u00b7 ${model} \u00b7 ${passed === true ? "PASS" : passed === false ? "FAIL" : "n/a"}`}
-                      />
-                    </td>
+                    <span
+                      key={row.id}
+                      title={`${row.id} \u00b7 ${model} \u00b7 ${label}`}
+                      className={`h-4 w-4 rounded-[3px] ${dotClass(p)}`}
+                    />
                   );
                 })}
-              </tr>
-            ))}
-            <tr className="border-t border-line">
-              <td className="px-2 py-1 text-subtle">passed/total</td>
-              {siteEvals.models.map((model) => {
-                const total = siteEvals.grid.length;
-                const passed = siteEvals.grid.filter((r) => r.passed[model] === true).length;
-                return (
-                  <td key={model} className="px-2 py-1 text-center text-muted">
-                    {passed}/{total}
-                  </td>
-                );
-              })}
-            </tr>
-          </tbody>
-        </table>
+              </div>
+              <span className="font-mono text-xs text-muted tabular-nums sm:text-right">
+                {passed}/{total}
+              </span>
+            </div>
+          );
+        })}
       </div>
-      <div className="flex items-center gap-4 mt-3 text-xs text-subtle">
-        <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-good" /> pass</span>
-        <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-bad" /> fail</span>
-        <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-line" /> n/a</span>
+      <div className="mt-5 flex items-center gap-4 text-xs text-subtle">
+        <span className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-[3px] bg-good" /> pass
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-[3px] bg-bad/70" /> fail
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-3 w-3 rounded-[3px] bg-line" /> no result
+        </span>
+        <span>Hover a square for the case id.</span>
       </div>
     </Section>
   );

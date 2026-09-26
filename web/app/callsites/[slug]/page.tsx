@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Panel, Section } from "@/components/Panel";
+import { Section } from "@/components/Panel";
 import { MiniStat } from "@/components/StatCard";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Disclaimer } from "@/components/Disclaimer";
 import { Badge, DecisionBadge, FoundByBadge } from "@/components/Badge";
 import { getCallsite, getSiteEvals, allSlugs } from "@/lib/data";
 import { ModelsTable, EvalExamples, EvalGrid } from "./CallSiteDetail";
-import {
-  formatUsd,
-  formatPct,
-  formatNumber,
-  siteName,
-  formatValue,
-} from "@/lib/format";
+import { formatUsd, formatPct, formatNumber, siteName, formatValue } from "@/lib/format";
 
 export const dynamicParams = false;
 
@@ -43,91 +37,107 @@ export default async function CallSiteDetailPage({
   if (!site) notFound();
 
   const siteEvals = getSiteEvals(slug);
-  const showJudge = site.grading === "judge";
+  const d = site.decision;
+  const c = site.cost;
+  const meta = [
+    site.difficulty,
+    site.grading,
+    site.output_format,
+    site.is_async ? "async" : null,
+    site.max_tokens != null ? `max_tokens ${site.max_tokens}` : null,
+    site.temperature != null ? `temperature ${site.temperature}` : null,
+  ].filter((x): x is string => Boolean(x));
 
   return (
     <>
-      {/* Header */}
-      <Panel>
-        <Link href="/callsites/" className="text-xs text-subtle hover:text-heading transition-colors mb-4 inline-block">
+      <section className="pt-10 sm:pt-14 pb-12">
+        <Link
+          href="/callsites/"
+          className="text-xs text-subtle hover:text-heading transition-colors"
+        >
           &#8592; All call sites
         </Link>
-        <p className="text-xs font-mono text-accent-2 tracking-wider mb-2 uppercase">
-          CALL SITE &middot; {site.file}:{site.line}
-        </p>
-        <h1 className="text-2xl font-bold font-mono text-heading mb-3">
-          {siteName(site.id)}
-        </h1>
-        <div className="flex flex-wrap gap-2 mb-4">
-          <FoundByBadge foundBy={site.found_by} />
-          {site.via && <Badge tone="accent">via {site.via}</Badge>}
-          {site.difficulty && <Badge>{site.difficulty}</Badge>}
-          {site.grading && <Badge>{site.grading}</Badge>}
-          {site.output_format && <Badge>{site.output_format}</Badge>}
-          {site.is_async && <Badge>async</Badge>}
-          {site.max_tokens != null && <Badge>max_tokens {site.max_tokens}</Badge>}
-          {site.temperature != null && <Badge>temperature {site.temperature}</Badge>}
-        </div>
-        {site.purpose && <p className="text-muted text-sm mb-4">{site.purpose}</p>}
-        {site.output_contract != null && (
-          <div className="mt-3">
-            <p className="text-xs font-mono text-subtle mb-1">Output contract</p>
-            {typeof site.output_contract === "string" ? (
-              <p className="text-sm text-muted">{site.output_contract}</p>
-            ) : (
-              <CodeBlock code={formatValue(site.output_contract)} />
+        <div className="mt-6 grid gap-10 lg:grid-cols-[1.3fr_1fr]">
+          <div>
+            <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-accent-2">
+              {site.file}:{site.line}
+            </p>
+            <h1 className="mt-2 text-3xl sm:text-4xl font-semibold font-mono tracking-tight text-heading break-all">
+              {siteName(site.id)}
+            </h1>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <FoundByBadge foundBy={site.found_by} />
+              {site.via && <Badge tone="accent">via {site.via}</Badge>}
+              {meta.map((m) => (
+                <Badge key={m}>{m}</Badge>
+              ))}
+            </div>
+            {site.purpose && <p className="mt-5 text-muted leading-relaxed">{site.purpose}</p>}
+            {site.output_contract != null && (
+              <div className="mt-5">
+                <p className="text-[11px] font-mono uppercase tracking-wider text-subtle mb-2">
+                  Output contract
+                </p>
+                {typeof site.output_contract === "string" ? (
+                  <p className="text-sm text-text leading-relaxed">{site.output_contract}</p>
+                ) : (
+                  <CodeBlock code={formatValue(site.output_contract)} />
+                )}
+              </div>
             )}
           </div>
-        )}
-      </Panel>
 
-      {/* Decision */}
-      <Section eyebrow="DECISION" title="">
-        {site.decision ? (
-          <>
-            <div className="flex items-center gap-3 mb-3">
-              <DecisionBadge action={site.decision.action} />
-              <span className="text-heading font-mono text-sm">
-                {site.decision.action === "downgrade"
-                  ? `${site.decision.baseline} \u2192 ${site.decision.model}`
-                  : `stays on ${site.decision.baseline}`}
-              </span>
+          <div className="rounded-xl border border-line bg-card p-6 self-start">
+            {d ? (
+              <>
+                <div className="flex flex-wrap items-center gap-2">
+                  <DecisionBadge action={d.action} />
+                  <span className="font-mono text-sm text-heading">
+                    {d.action === "downgrade"
+                      ? `${d.baseline} \u2192 ${d.model}`
+                      : `stays on ${d.baseline}`}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{d.reason}</p>
+                <div className="mt-5 pt-5 border-t border-line grid grid-cols-2 gap-5">
+                  <MiniStat value={formatUsd(c?.before_monthly ?? null)} label="Before / month" tone="warn" />
+                  <MiniStat value={formatUsd(c?.after_monthly ?? null)} label="After / month" tone="good" />
+                  <MiniStat
+                    value={formatUsd(c?.savings ?? null)}
+                    label={`Savings (${formatPct(c?.savings_pct ?? null)})`}
+                    tone="good"
+                  />
+                  <MiniStat value={formatNumber(c?.calls_per_day ?? null)} label="Calls / day" tone="violet" />
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted">No decision available.</p>
+            )}
+            <div className="mt-5">
+              <Disclaimer />
             </div>
-            <p className="text-muted text-sm mb-5">{site.decision.reason}</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-              <MiniStat value={formatUsd(site.cost?.before_monthly ?? null)} label="Before/mo" />
-              <MiniStat value={formatUsd(site.cost?.after_monthly ?? null)} label="After/mo" tone="good" />
-              <MiniStat
-                value={`${formatUsd(site.cost?.savings ?? null)} (${formatPct(site.cost?.savings_pct ?? null)})`}
-                label="Savings/mo"
-                tone="good"
-              />
-              <MiniStat value={formatNumber(site.cost?.calls_per_day ?? null)} label="Calls/day" />
-            </div>
-            <Disclaimer />
-          </>
-        ) : (
-          <p className="text-muted text-sm">No decision available.</p>
-        )}
-      </Section>
+          </div>
+        </div>
+      </section>
 
-      {/* Models */}
-      <ModelsTable site={site} showJudge={showJudge} />
+      <ModelsTable site={site} showJudge={site.grading === "judge"} />
 
-      {/* Prompt */}
-      <Section eyebrow="PROMPT" title="">
-        <p className="text-xs text-subtle mb-3">
-          Model in code: <span className="font-mono text-muted">{site.model_in_code ?? "unresolved"}</span>
+      <Section eyebrow="Prompt" title="What the call sends">
+        <p className="text-xs text-subtle mb-4">
+          Model in code:{" "}
+          <span className="font-mono text-muted">{site.model_in_code ?? "unresolved"}</span>
         </p>
         {site.messages ? (
           <div className="space-y-4">
             {site.messages.map((msg, i) => (
               <div key={i}>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-mono text-subtle uppercase">{msg.role}</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-subtle">
+                    {msg.role}
+                  </span>
                   {!msg.resolved && <Badge tone="warn">not resolved statically</Badge>}
                 </div>
-                <div className="rounded-xl border border-line bg-card p-4 overflow-x-auto text-xs font-mono text-muted whitespace-pre-wrap">
+                <div className="rounded-lg border border-line bg-card px-4 py-3.5 text-xs font-mono text-text whitespace-pre-wrap">
                   {msg.content}
                 </div>
               </div>
@@ -138,21 +148,14 @@ export default async function CallSiteDetailPage({
         )}
       </Section>
 
-      {/* Eval examples */}
       {siteEvals ? (
-        <EvalExamples siteEvals={siteEvals} />
+        <>
+          <EvalExamples siteEvals={siteEvals} />
+          <EvalGrid siteEvals={siteEvals} />
+        </>
       ) : (
-        <Section eyebrow="EVAL EXAMPLES" title="">
-          <p className="text-muted text-sm">No evals for this call site.</p>
-        </Section>
-      )}
-
-      {/* All cases grid */}
-      {siteEvals ? (
-        <EvalGrid siteEvals={siteEvals} />
-      ) : (
-        <Section eyebrow="ALL CASES" title="">
-          <p className="text-muted text-sm">No evals for this call site.</p>
+        <Section eyebrow="Evals" title="No evals for this call site">
+          <p className="text-muted text-sm">Run downshift evalgen or the Bob Eval Writer first.</p>
         </Section>
       )}
     </>

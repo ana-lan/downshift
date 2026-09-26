@@ -15,7 +15,7 @@ export function Panel({ children, className = "" }: PanelProps) {
 
 interface SectionProps {
   eyebrow: string;
-  title: string;
+  title?: string;
   children: ReactNode;
 }
 
@@ -28,9 +28,13 @@ export function Section({ eyebrow, title, children }: SectionProps) {
           {eyebrow}
         </p>
       </div>
-      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-heading mb-6 sm:mb-8">
-        {title}
-      </h2>
+      {title ? (
+        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-heading mb-6 sm:mb-8">
+          {title}
+        </h2>
+      ) : (
+        <div className="mb-4" />
+      )}
       {children}
     </Panel>
   );

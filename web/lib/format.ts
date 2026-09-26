@@ -54,3 +54,9 @@ export function formatValue(v: unknown): string {
   if (typeof v === "string") return v;
   return JSON.stringify(v, null, 2);
 }
+
+/** "qwen2.5:7b" -> "7b". Anything without a colon is returned as is. */
+export function shortModel(model: string): string {
+  const i = model.lastIndexOf(":");
+  return i >= 0 ? model.slice(i + 1) : model;
+}
