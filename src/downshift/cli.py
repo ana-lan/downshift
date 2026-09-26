@@ -67,11 +67,6 @@ def main_callback(
     """Downshift: cut LLM costs per PR."""
 
 
-def _not_implemented(name: str) -> None:
-    typer.echo(f"`downshift {name}` is not implemented yet.", err=True)
-    raise typer.Exit(code=1)
-
-
 def _fail(message: str) -> None:
     typer.echo(f"Error: {message}", err=True)
     raise typer.Exit(code=2)
