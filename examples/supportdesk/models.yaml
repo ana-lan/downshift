@@ -1,13 +1,14 @@
 # Model assignments for SupportDesk features.
 # Each entry was chosen from the Downshift cost report (downshift.report.md).
-# lang_of is downgraded to qwen2.5:1.5b; every other feature keeps qwen2.5:7b.
+# lang_of is downgraded to qwen2.5:1.5b; extract_order_info and detect_sentiment to qwen2.5:3b;
+# every other feature keeps qwen2.5:7b.
 
 features:
   classify_category: "qwen2.5:7b"
-  detect_sentiment: "qwen2.5:7b"
+  detect_sentiment: "qwen2.5:3b"
   tag_urgency: "qwen2.5:7b"
   lang_of: "qwen2.5:1.5b"
-  extract_order_info: "qwen2.5:7b"
+  extract_order_info: "qwen2.5:3b"
   decide_refund: "qwen2.5:7b"
   summarize_for_agent: "qwen2.5:7b"
   draft_reply: "qwen2.5:7b"

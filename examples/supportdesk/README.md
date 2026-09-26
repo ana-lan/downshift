@@ -45,10 +45,10 @@ Environment variables: `SUPPORTDESK_LLM_BASE_URL` (default `http://localhost:114
 | Feature | Model |
 |---|---|
 | `classify_category` | `qwen2.5:7b` |
-| `detect_sentiment` | `qwen2.5:7b` |
+| `detect_sentiment` | `qwen2.5:3b` |
 | `tag_urgency` | `qwen2.5:7b` |
 | `lang_of` | `qwen2.5:1.5b` |
-| `extract_order_info` | `qwen2.5:7b` |
+| `extract_order_info` | `qwen2.5:3b` |
 | `decide_refund` | `qwen2.5:7b` |
 | `summarize_for_agent` | `qwen2.5:7b` |
 | `draft_reply` | `qwen2.5:7b` |
