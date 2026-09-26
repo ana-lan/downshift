@@ -23,7 +23,7 @@ inputs:
     default: "true"
   package:
     description: pip install target for downshift, e.g. a version spec, or "." for the checked out source.
-    default: "downshift>=0.1.0.dev0"
+    default: "downshift>=0.1.0"
   python-version:
     description: Python version used to run downshift.
     default: "3.12"
