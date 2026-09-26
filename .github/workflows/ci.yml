@@ -27,7 +27,7 @@ jobs:
       - name: Type check
         run: mypy src
       - name: Test
-        run: pytest --cov=downshift --cov-report=term-missing
+        run: pytest --cov=downshift --cov-report=term-missing --cov-fail-under=80
 
   web:
     runs-on: ubuntu-latest
