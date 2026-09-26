@@ -18,3 +18,4 @@ jobs:
         with:
           path: examples/supportdesk
           package: .
+          fail-above: "500"
