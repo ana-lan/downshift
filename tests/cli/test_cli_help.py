@@ -4,7 +4,7 @@ from downshift import __version__
 from downshift.cli import app
 
 runner = CliRunner()
-COMMANDS = ["scan", "evalgen", "report", "diff", "export"]
+COMMANDS = ["scan", "evalgen", "report", "estimate", "diff", "export"]
 
 
 def test_help_lists_all_commands() -> None:
