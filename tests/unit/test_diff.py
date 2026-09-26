@@ -174,7 +174,7 @@ def test_render_added():
     assert md.startswith("## Downshift cost diff\n")
     assert "**$0.00 -> $7.20 (+$7.20)**" in md
     assert f"`{site.id}`" in md
-    assert "| added |" in md
+    assert "| + |" in md
     assert "4 + 10" in md
     assert "Projection, not a bill" in md
 
@@ -191,7 +191,7 @@ def test_render_no_changes():
     md = render_markdown(diff([make_site()], [make_site()]))
     assert "No LLM call site cost changes" in md
     assert "$7.20" in md
-    assert "| Change |" not in md
+    assert "| Call site |" not in md
 
 
 def test_render_marks_and_notes():

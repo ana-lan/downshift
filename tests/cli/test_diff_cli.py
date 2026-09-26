@@ -75,7 +75,7 @@ def test_added_in_working_tree(repo: Path) -> None:
     (repo / "big.py").write_text(call_source("escalate", max_tokens=2048))
     result = invoke(str(repo))
     assert result.exit_code == 0, result.output
-    assert "| added |" in result.output
+    assert "| + |" in result.output
     assert "`big.py::escalate`" in result.output
     assert "(+$" in result.output
 
@@ -84,7 +84,7 @@ def test_removed(repo: Path) -> None:
     (repo / "app.py").unlink()
     result = invoke(str(repo))
     assert result.exit_code == 0, result.output
-    assert "| removed |" in result.output
+    assert "| - |" in result.output
     assert "-$" in result.output
 
 
@@ -92,7 +92,7 @@ def test_changed_model(repo: Path) -> None:
     (repo / "app.py").write_text(call_source("classify", model="qwen2.5:0.5b"))
     result = invoke(str(repo))
     assert result.exit_code == 0, result.output
-    assert "| changed |" in result.output
+    assert "| ~ |" in result.output
     assert "qwen2.5:7b -> qwen2.5:0.5b" in result.output
 
 
@@ -114,7 +114,7 @@ def test_subdirectory_new_at_head(repo: Path) -> None:
     result = invoke(str(sub))
     assert result.exit_code == 0, result.output
     assert "`tool.py::helper`" in result.output
-    assert "| added |" in result.output
+    assert "| + |" in result.output
     assert "app.py" not in result.output
 
 

@@ -35,15 +35,15 @@ def test_single_file_prices_every_site_as_added() -> None:
     assert result.exit_code == 0, result.output
     assert "## Downshift cost diff" in result.output
     assert "`bob` vs `no call sites`" in result.output
-    assert "| added |" in result.output
+    assert "| + |" in result.output
 
 
 def test_base_file_compares_ast_scan_with_bob_audit() -> None:
     result = run(str(AUDIT), "--base", str(SCAN), "-c", str(CONFIG))
     assert result.exit_code == 0, result.output
     assert "`bob` vs `ast`" in result.output
-    assert "| added |" in result.output
-    assert "| removed |" in result.output
+    assert "| + |" in result.output
+    assert "| - |" in result.output
 
 
 def test_same_generator_uses_before_after_labels() -> None:
