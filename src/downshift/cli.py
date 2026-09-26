@@ -26,6 +26,7 @@ from downshift.evals import (
     slug_for,
     validate_eval_set,
 )
+from downshift.export import DEFAULT_EXAMPLES, build_export, write_export
 from downshift.gitref import GitError, extract_ref, repo_root
 from downshift.llm import LLMClient, LLMError, OpenAICompatClient
 from downshift.report import ReportError, build_report, render_markdown
@@ -813,9 +814,77 @@ def diff(
 
 
 @app.command()
-def dashboard() -> None:
-    """Build the static HTML dashboard."""
-    _not_implemented("dashboard")
+def export(
+    path: Path = typer.Argument(
+        Path("."), help="Folder with downshift.audit.json, evals/ and results/."
+    ),
+    out: Path = typer.Option(Path("downshift-export"), "--out", "-o", help="Output folder."),
+    callsites: Path | None = typer.Option(
+        None, "--callsites", help="Audit JSON. Default: PATH/downshift.audit.json."
+    ),
+    ast_file: Path | None = typer.Option(
+        None, "--ast", help="Ast scan JSON. Default: PATH/downshift.scan.json if present."
+    ),
+    ast_after_file: Path | None = typer.Option(
+        None,
+        "--ast-after",
+        help="Ast scan after refactor. Default: PATH/downshift.scan.after.json if present.",
+    ),
+    config: Path | None = typer.Option(None, "--config", "-c", help="Config file."),
+    examples: int = typer.Option(
+        DEFAULT_EXAMPLES, "--examples", min=0, help="Example eval cases per call site."
+    ),
+    name: str | None = typer.Option(None, "--name", help="Project name. Default: PATH name."),
+) -> None:
+    """Export JSON and the report for the demo web app."""
+    audit_path = callsites if callsites is not None else path / "downshift.audit.json"
+    ast_path = ast_file if ast_file is not None else path / "downshift.scan.json"
+    after_path = (
+        ast_after_file if ast_after_file is not None else path / "downshift.scan.after.json"
+    )
+    for required, explicit in (
+        (audit_path, True),
+        (ast_path, ast_file is not None),
+        (after_path, ast_after_file is not None),
+    ):
+        if explicit and not required.exists():
+            _fail(f"File not found: {required}")
+            return
+
+    try:
+        audit = ScanResult.load(audit_path)
+        ast_scan = ScanResult.load(ast_path) if ast_path.exists() else None
+        after_scan = ScanResult.load(after_path) if after_path.exists() else None
+        cfg = resolve_config(config, audit_path.parent)
+    except (SchemaError, ConfigError) as exc:
+        _fail(str(exc))
+        return
+
+    evals_dir = audit_path.parent / "evals"
+    results_dir = audit_path.parent / "results"
+    try:
+        rep = build_report(audit, cfg, evals_dir, results_dir)
+    except ReportError as exc:
+        _fail(str(exc))
+        return
+
+    payloads = build_export(
+        rep,
+        cfg,
+        audit=audit,
+        evals_dir=evals_dir,
+        results_dir=results_dir,
+        ast=ast_scan,
+        ast_after=after_scan,
+        project=name or path.resolve().name,
+        examples=examples,
+    )
+    written = write_export(out, payloads, render_markdown(rep))
+    savings = rep.costs.savings if rep.costs.sites else 0.0
+    typer.echo(
+        f"Wrote {len(written)} files to {out}: downgraded {len(rep.downgraded)} of"
+        f" {len(rep.decisions)} call sites, projected savings ${savings:,.2f}/month."
+    )
 
 
 def main() -> None:

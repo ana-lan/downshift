@@ -1,0 +1,2824 @@
+[
+  {
+    "site_id": "supportdesk/agent_assist.py::draft_reply",
+    "slug": "supportdesk.agent_assist__draft_reply",
+    "grading": "judge",
+    "cases": 22,
+    "models": [
+      "qwen2.5:7b",
+      "qwen2.5:3b",
+      "qwen2.5:1.5b",
+      "qwen2.5:0.5b"
+    ],
+    "examples": [
+      {
+        "id": "dft-01",
+        "inputs": {
+          "language": "en",
+          "summary": "The customer wants a refund for order ORD-10421. The order was placed on 2026-09-02 for unused wireless headphones still in the original box.",
+          "subject": "Refund request for ORD-10421",
+          "body": "Hi, I ordered a pair of wireless headphones on 2026-09-02 (order ORD-10421). They're unused and still in the box, but I changed my mind. Can I get a refund?"
+        },
+        "expected": "Written in English. Under 120 words. Addresses the change-of-mind refund request for ORD-10421. Says a teammate will confirm next steps. Does not promise a refund, credit, delivery date or any timeframe.",
+        "notes": "English change-of-mind refund — must not promise refund (T001)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "Thank you for reaching out. We can certainly assist with your refund request. A teammate will review your order and get back to you with next steps. Please expect a response within 24-48 hours.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: It omits the specific order number and provides a response timeframe, violating the rubric's no‑timeframe rule.",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "I understand your request for refund. Our team will confirm next steps for ORD-10421.",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": 5,
+            "detail": "judge 5/5: Meets all rubric criteria: English, concise, addresses request, mentions teammate, no promises.",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "Hi there! Thank you for reaching out. We'd be happy to assist with your refund request. Please provide your order number and any additional details you might have, such as the reason for your change of mind. Once we have this information, we can proceed with the refund process.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: It omits mentioning ORD-10421 and does not state a teammate will confirm next steps, though it is in English, under 120 words, and avoids promises.",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "The customer wants a refund for order ORD-10421. The order was placed on 2026-09-02 for unused wireless headphones still in the original box.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: The reply only repeats the request and omits a response or mention of a teammate confirming next steps.",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "dft-02",
+        "inputs": {
+          "language": "en",
+          "summary": "The customer wants a refund for a missing package. The order ORD-10588 was placed on 2026-08-28 and tracking has not updated in 10 days.",
+          "subject": "Where is my package??",
+          "body": "Order ORD-10588 placed on 2026-08-28 still hasn't arrived. Tracking hasn't updated in 10 days. This is ridiculous. I want my money back."
+        },
+        "expected": "Written in English. Under 120 words. Addresses the missing package and refund request for ORD-10588. Says a teammate will confirm next steps. Does not promise a refund, credit, delivery date or any timeframe.",
+        "notes": "English non-delivery refund demand — must not promise refund or delivery date (T002)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "I understand your frustration. I'll forward your order details to our logistics team for a status update. They'll get back to you with more information. Thank you for your patience.",
+            "passed": false,
+            "score": 0.5,
+            "judge_score": 3,
+            "detail": "judge 3/5: Meets language, length, and no promises criteria, but fails to explicitly address the customer's refund request",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "I understand your concern. Your order is being reviewed. A team member will contact you shortly to discuss next steps.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: The response is in English, short, and mentions a teammate, but it fails to reference the missing package, the refund request, or the specific order number.",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "I'm sorry to hear that your package hasn't arrived yet. We'll need to confirm the next steps with a teammate to ensure your refund request is processed correctly. Please provide your order number and any additional details you might have, and we'll take it from there.",
+            "passed": false,
+            "score": 0.5,
+            "judge_score": 3,
+            "detail": "judge 3/5: The response is in English, under 120 words, mentions a teammate and avoids promises, but fails to reference the specific order ORD-10588.",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "The customer is experiencing a delay in tracking updates for their order, which is causing confusion and frustration. They are seeking a refund for the missing package.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: It omits the order number and does not mention a teammate confirming next steps, though it is English, brief, and avoids promises.",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "dft-03",
+        "inputs": {
+          "language": "es",
+          "summary": "The customer wants a refund for a damaged lamp. The order ORD-10812 was placed on 2026-07-30.",
+          "subject": "Solicitud de reembolso",
+          "body": "Hola, compré una lámpara (pedido ORD-10812) el 2026-07-30 y llegó rota. ¿Pueden devolverme el dinero?"
+        },
+        "expected": "Written in Spanish. Under 120 words. Addresses the refund request for the damaged lamp in order ORD-10812. Says a teammate will confirm next steps. Does not promise a refund, credit, delivery date or any timeframe.",
+        "notes": "Spanish ticket — reply must be in Spanish (T006)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "¡Entendido! Lamento que tu lámpara llegara dañada. Un equipo de soporte revisará tu caso. Pronto recibirás un correo con más detalles. Gracias por tu paciencia.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: The reply is in Spanish and short, but it omits the order number, does not explicitly say a teammate will confirm next steps, and gives a vague timeframe.",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "Entendido, un equipo de servicio al cliente se pondrá en contacto con usted para resolver esto.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: Does not mention the damaged lamp or order number, so does not address the refund request.",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "Hola, gracias por contactar con nosotros. Confirmaremos la solicitud de reembolso para el pedido ORD-10812. Un equipo técnico se encargará de revisar la situación y procederá con la devolución. Una confirmación de la próxima etapa se proporcionará en breve.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: Meets language, length, and order reference but incorrectly promises a refund and does not explicitly state a teammate will confirm next steps.",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "El pedido de lámpara ORD-10812 fue devuelto por el cliente Solicitud de reembolso.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: Meets language and length but does not address the refund request properly nor mention a teammate will confirm next steps.",
+            "error": null
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "id": "dft-01",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-02",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-03",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-04",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-05",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-06",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-07",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-08",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-09",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-10",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-11",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-12",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-13",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-14",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-15",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-16",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-17",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-18",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-19",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-20",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-21",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "dft-22",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      }
+    ]
+  },
+  {
+    "site_id": "supportdesk/agent_assist.py::summarize_for_agent",
+    "slug": "supportdesk.agent_assist__summarize_for_agent",
+    "grading": "judge",
+    "cases": 22,
+    "models": [
+      "qwen2.5:7b",
+      "qwen2.5:3b",
+      "qwen2.5:1.5b",
+      "qwen2.5:0.5b"
+    ],
+    "examples": [
+      {
+        "id": "sum-01",
+        "inputs": {
+          "subject": "Refund request for ORD-10421",
+          "body": "Hi, I ordered a pair of wireless headphones on 2026-09-02 (order ORD-10421). They're unused and still in the box, but I changed my mind. Can I get a refund?"
+        },
+        "expected": "Exactly 2 short English sentences. Sentence 1 says the customer wants a refund for order ORD-10421. Sentence 2 mentions order ORD-10421, order date 2026-09-02, and that the item is unused and in original packaging. No details that are not in the ticket.",
+        "notes": "standard change-of-mind refund with order ID and date (T001)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "The customer wants a refund for an unused pair of wireless headphones ordered on 2026-09-02 (order ID: ORD-10421).",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": 1,
+            "detail": "judge 1/5: Output contains only one sentence instead of the required two.",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "What the customer wants: A refund for unused wireless headphones ordered on 2026-09-02.\nKey details: Order ID ORD-10421, order date 2026-09-02.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: Sentences are present but the first omits the order ID and the second omits the unused/in-original-packaging detail.",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "**What the customer wants:**\nThe customer wants a refund for the pair of wireless headphones ordered on 2026-09-02 with order ID ORD-10421.\n\n**Key details:**\n- Order ID: ORD-10421\n- Date of order: 2026-09-02\n- The headphones are unused and still in the box.",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": 1,
+            "detail": "judge 1/5: The response is not exactly two short sentences; it uses headings and bullet points, violating the required format.",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "The customer wants to return the wireless headphones they ordered on September 2, 2026, and is seeking a refund.",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": 1,
+            "detail": "judge 1/5: Output is only one sentence, missing order ID and item condition details required by the rubric.",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "sum-02",
+        "inputs": {
+          "subject": "Where is my package??",
+          "body": "Order ORD-10588 placed on 2026-08-28 still hasn't arrived. Tracking hasn't updated in 10 days. This is ridiculous. I want my money back."
+        },
+        "expected": "Exactly 2 short English sentences. Sentence 1 says the customer wants a refund for a missing package. Sentence 2 mentions order ORD-10588, order date 2026-08-28, and that tracking has not updated in 10 days. No details that are not in the ticket.",
+        "notes": "non-delivery with refund demand (T002)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "The customer wants a refund for an order that has not arrived. The order ID is ORD-10588, placed on 2026-08-28, and the tracking has not been updated in 10 days.",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": 5,
+            "detail": "judge 5/5: Meets all rubric criteria with exactly two correct sentences and no extra details.",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "What the customer wants: Delivery of their package.\nKey details: Order ID - ORD-10588, Order placed on 2026-08-28, Tracking hasn't updated in 10 days.",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": 1,
+            "detail": "judge 1/5: Sentence 1 does not state the refund request as required.",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "**Customer's Request:**\nThe customer wants to know the status of their package and is demanding a refund due to the delay in delivery.\n\n**Key Details:**\n- Order ID: ORD-10588\n- Date Placed: 2026-08-28\n- Tracking Status: No updates in 10 days\n- Amount: Not specified in the message",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": 1,
+            "detail": "judge 1/5: The response is not exactly two short sentences and includes bullet points and extra details, violating the rubric.",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "The customer wants to know where their package is and if it's still in their possession. They are experiencing delays in tracking their package and are concerned about the status of their order.",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": 1,
+            "detail": "judge 1/5: The output does not mention the refund request or the required order details, violating the rubric.",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "sum-03",
+        "inputs": {
+          "subject": "App crashes on login",
+          "body": "Every time I open the SupportDesk Store app on my phone and tap Log in, it crashes. I've reinstalled it twice. App version 4.2.1."
+        },
+        "expected": "Exactly 2 short English sentences. Sentence 1 says the customer wants the login crash fixed. Sentence 2 mentions app version 4.2.1 and that the issue persists after two reinstalls. No details that are not in the ticket.",
+        "notes": "technical bug, no order details (T003)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "The customer wants the SupportDesk Store app to stop crashing upon login. The key details are: the app version is 4.2.1, and the customer has reinstalled it twice.",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": 5,
+            "detail": "judge 5/5: Meets all rubric criteria: exactly two short sentences, first states desire to fix login crash, second includes version 4.2.1 and two reinstalls, no extra info.",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "What the customer wants: To fix the app crash issue.\nKey details: Order ID not provided, dates not provided, amounts not provided. App version: 4.2.1.",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": 1,
+            "detail": "judge 1/5: The response has three sentences, includes irrelevant details, and omits mention of the two reinstalls, violating the rubric.",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "**What the customer wants:**\nThe customer wants the SupportDesk Store app to function properly without crashing when attempting to log in.\n\n**Key details:**\n- Order ID: Not provided\n- Dates: Not provided\n- Amounts: Not provided\n- App version: 4.2.1",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": 1,
+            "detail": "judge 1/5: Output is not two short sentences; it uses bullet points and extra formatting, not meeting the rubric.",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "The customer wants to log in to the SupportDesk Store app on their phone, but it crashes every time they open it. They have tried reinstalling the app twice, and the issue persists.",
+            "passed": false,
+            "score": 0.25,
+            "judge_score": 2,
+            "detail": "judge 2/5: Only two sentences, but second sentence omits the required app version and first sentence doesn't explicitly state the desire for the login crash to be fixed.",
+            "error": null
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "id": "sum-01",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-02",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-03",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-04",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sum-05",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-06",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-07",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-08",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-09",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-10",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-11",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-12",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-13",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-14",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-15",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-16",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-17",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-18",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-19",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-20",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-21",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sum-22",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      }
+    ]
+  },
+  {
+    "site_id": "supportdesk/extract.py::extract_order_info",
+    "slug": "supportdesk.extract__extract_order_info",
+    "grading": "json_fields",
+    "cases": 21,
+    "models": [
+      "qwen2.5:7b",
+      "qwen2.5:3b",
+      "qwen2.5:1.5b",
+      "qwen2.5:0.5b"
+    ],
+    "examples": [
+      {
+        "id": "ext-01",
+        "inputs": {
+          "ticket_text": "Refund request for ORD-10421\n\nHi, I ordered a pair of wireless headphones on 2026-09-02 (order ORD-10421). They're unused and still in the box, but I changed my mind. Can I get a refund?"
+        },
+        "expected": {
+          "order_id": "ORD-10421",
+          "order_date": "2026-09-02"
+        },
+        "notes": "both order ID and date explicit (T001)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "{\n  \"order_id\": \"ORD-10421\",\n  \"order_date\": \"2026-09-02\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "{\n  \"order_id\": \"ORD-10421\",\n  \"order_date\": \"2026-09-02\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "{\n  \"order_id\": \"ORD-10421\",\n  \"order_date\": \"2026-09-02\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "{\n  \"order_id\": \"ORD-10421\",\n  \"order_date\": \"2026-09-02\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "ext-02",
+        "inputs": {
+          "ticket_text": "Where is my package??\n\nOrder ORD-10588 placed on 2026-08-28 still hasn't arrived. Tracking hasn't updated in 10 days. This is ridiculous. I want my money back."
+        },
+        "expected": {
+          "order_id": "ORD-10588",
+          "order_date": "2026-08-28"
+        },
+        "notes": "YYYY-MM-DD date directly stated (T002)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "{\n  \"order_id\": \"ORD-10588\",\n  \"order_date\": \"2026-08-28\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "{\n  \"order_id\": \"ORD-10588\",\n  \"order_date\": \"2026-08-28\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "{\n  \"order_id\": \"ORD-10588\",\n  \"order_date\": \"2026-08-28\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "{\n  \"order_id\": \"ORD-10588\",\n  \"order_date\": null\n}",
+            "passed": false,
+            "score": 0.5,
+            "judge_score": null,
+            "detail": "order_date: expected '2026-08-28', got None",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "ext-04",
+        "inputs": {
+          "ticket_text": "Solicitud de reembolso\n\nHola, compré una lámpara (pedido ORD-10812) el 2026-07-30 y llegó rota. ¿Pueden devolverme el dinero?"
+        },
+        "expected": {
+          "order_id": "ORD-10812",
+          "order_date": "2026-07-30"
+        },
+        "notes": "Spanish ticket, date in YYYY-MM-DD format (T006)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "{\n  \"order_id\": \"ORD-10812\",\n  \"order_date\": \"2026-07-30\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "{\n  \"order_id\": \"ORD-10812\",\n  \"order_date\": \"2026-07-30\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "{\n  \"order_id\": \"ORD-10812\",\n  \"order_date\": \"2026-07-30\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "{\n  \"order_id\": \"ORD-10812\",\n  \"order_date\": \"2026-07-30\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "id": "ext-01",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-02",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "ext-04",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-05",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "ext-06",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-07",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "ext-08",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-09",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-10",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-11",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-12",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-13",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-14",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "ext-15",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-16",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-17",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-18",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "ext-19",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-20",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "ext-21",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "ext-22",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      }
+    ]
+  },
+  {
+    "site_id": "supportdesk/misc_utils.py::lang_of",
+    "slug": "supportdesk.misc_utils__lang_of",
+    "grading": "exact",
+    "cases": 22,
+    "models": [
+      "qwen2.5:7b",
+      "qwen2.5:3b",
+      "qwen2.5:1.5b",
+      "qwen2.5:0.5b"
+    ],
+    "examples": [
+      {
+        "id": "lng-01",
+        "inputs": {
+          "text": "Refund request for ORD-10421\n\nHi, I ordered a pair of wireless headphones on 2026-09-02 (order ORD-10421). They're unused and still in the box, but I changed my mind. Can I get a refund?"
+        },
+        "expected": "en",
+        "notes": "standard English ticket (T001)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "en",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "en",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "en",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "en",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "lng-02",
+        "inputs": {
+          "text": "Solicitud de reembolso\n\nHola, compré una lámpara (pedido ORD-10812) el 2026-07-30 y llegó rota. ¿Pueden devolverme el dinero?"
+        },
+        "expected": "es",
+        "notes": "Spanish refund request (T006)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "es",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "es",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "es",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "es",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "lng-03",
+        "inputs": {
+          "text": "Colis non reçu\n\nBonjour, ma commande ORD-10905 du 2026-09-10 n'est toujours pas arrivée. Pouvez-vous vérifier ?"
+        },
+        "expected": "fr",
+        "notes": "French non-delivery inquiry (T007)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "fr",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "fr",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "fr",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "fr",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "id": "lng-01",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-02",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-03",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-04",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-05",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-06",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "lng-07",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-08",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-09",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-10",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-11",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-12",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-13",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-14",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-15",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-16",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-17",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "lng-18",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "lng-19",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "lng-20",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-21",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "lng-22",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      }
+    ]
+  },
+  {
+    "site_id": "supportdesk/policy.py::decide_refund",
+    "slug": "supportdesk.policy__decide_refund",
+    "grading": "json_fields",
+    "cases": 25,
+    "models": [
+      "qwen2.5:7b",
+      "qwen2.5:3b",
+      "qwen2.5:1.5b",
+      "qwen2.5:0.5b"
+    ],
+    "examples": [
+      {
+        "id": "pol-01",
+        "inputs": {
+          "policy": "# SupportDesk Store Refund Policy (v3)\n\nThis is a fictional policy for a fictional store, used only as demo data.\n\n## 1. Standard returns\n1.1 Physical items can be returned for a full refund within 30 days of the order date.\n1.2 Returned items must be unused and in their original packaging.\n\n## 2. Damaged or defective items\n2.1 Items that arrive damaged or defective are eligible for a full refund or replacement within 60 days of the order date.\n2.2 Damage reported more than 60 days after the order date is not eligible.\n\n## 3. Exceptions\n3.1 Digital products (e-books, software licenses, gift cards) are non-refundable once downloaded or activated.\n3.2 Items bought on clearance sale are eligible for store credit only, not a cash refund.\n3.3 If an order has not been delivered 14 days after the order date, the customer is eligible for a full refund.\n\n## 4. Missing information\n4.1 If the order ID or order date is missing, the refund cannot be decided. Ask the customer for the missing details.\n",
+          "today": "2026-09-20",
+          "order_info_json": {
+            "order_id": "ORD-10421",
+            "order_date": "2026-09-02"
+          },
+          "subject": "Refund request for ORD-10421",
+          "body": "Hi, I ordered a pair of wireless headphones on 2026-09-02 (order ORD-10421). They're unused and still in the box, but I changed my mind. Can I get a refund?"
+        },
+        "expected": {
+          "is_refund_request": true,
+          "eligible": "yes",
+          "policy_section": "1.1"
+        },
+        "notes": "change-of-mind, unused in original packaging, 18 days — within 30-day limit (T001)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "{\n  \"reasoning\": \"The order was placed on 2026-09-02, and the item is unused and in its original packaging. According to section 1.1 of the refund policy, physical items can be returned for a full refund within 30 days of the order date.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"yes\",\n  \"policy_section\": \"1.1\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "{\n  \"reasoning\": \"The order was placed on September 2, 2026, and the customer is requesting a refund for unused items within the 30-day return period.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"yes\",\n  \"policy_section\": \"1.1\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "{\n  \"reasoning\": \"The order was placed on 2026-09-02, which is within the 30-day return period. The items are unused and in their original packaging, so they can be returned for a full refund.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"yes\",\n  \"policy_section\": \"1.1\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "{\n  \"reasoning\": \"The customer ordered a pair of wireless headphones on 2026-09-02 (order ORD-10421) and they are in the box, but they changed their mind and want a refund.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"no\",\n  \"policy_section\": 2\n}",
+            "passed": false,
+            "score": 0.3333,
+            "judge_score": null,
+            "detail": "eligible: expected 'yes', got 'no'; policy_section: expected '1.1', got 2",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "pol-02",
+        "inputs": {
+          "policy": "# SupportDesk Store Refund Policy (v3)\n\nThis is a fictional policy for a fictional store, used only as demo data.\n\n## 1. Standard returns\n1.1 Physical items can be returned for a full refund within 30 days of the order date.\n1.2 Returned items must be unused and in their original packaging.\n\n## 2. Damaged or defective items\n2.1 Items that arrive damaged or defective are eligible for a full refund or replacement within 60 days of the order date.\n2.2 Damage reported more than 60 days after the order date is not eligible.\n\n## 3. Exceptions\n3.1 Digital products (e-books, software licenses, gift cards) are non-refundable once downloaded or activated.\n3.2 Items bought on clearance sale are eligible for store credit only, not a cash refund.\n3.3 If an order has not been delivered 14 days after the order date, the customer is eligible for a full refund.\n\n## 4. Missing information\n4.1 If the order ID or order date is missing, the refund cannot be decided. Ask the customer for the missing details.\n",
+          "today": "2026-10-05",
+          "order_info_json": {
+            "order_id": "ORD-09877",
+            "order_date": "2026-06-12"
+          },
+          "subject": "Refund please",
+          "body": "Order ORD-09877 from 2026-06-12, a blender. I never used it. I want a refund."
+        },
+        "expected": {
+          "is_refund_request": true,
+          "eligible": "no",
+          "policy_section": "1.1"
+        },
+        "notes": "change-of-mind, unused, but 115 days — far past 30-day window (T012)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "{\n  \"reasoning\": \"The blender can be returned for a full refund since it is an unused physical item and the return is within 30 days of the order date.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"yes\",\n  \"policy_section\": \"1.1\"\n}",
+            "passed": false,
+            "score": 0.6667,
+            "judge_score": null,
+            "detail": "eligible: expected 'no', got 'yes'",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "{\n  \"reasoning\": \"The order date is June 12, 2026, and the current date is October 5, 2026. The customer is requesting a refund for a blender that was never used, which falls under the 'Standard returns' section of the refund policy.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"yes\",\n  \"policy_section\": \"1.1\"\n}",
+            "passed": false,
+            "score": 0.6667,
+            "judge_score": null,
+            "detail": "eligible: expected 'no', got 'yes'",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "{\n  \"reasoning\": \"The order was placed on June 12, 2026, and the customer wants a refund for a blender that they never used. This falls under the 'Physical items can be returned for a full refund within 30 days of the order date' section of the policy. The customer has not exceeded the 30-day return period, so they are eligible for a full refund.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"yes\",\n  \"policy_section\": \"1\"\n}",
+            "passed": false,
+            "score": 0.3333,
+            "judge_score": null,
+            "detail": "eligible: expected 'no', got 'yes'; policy_section: expected '1.1', got '1'",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "{\n  \"reasoning\": \"The customer never used the blender and wants a refund.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"no\",\n  \"policy_section\": 2\n}",
+            "passed": false,
+            "score": 0.6667,
+            "judge_score": null,
+            "detail": "policy_section: expected '1.1', got 2",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "pol-03",
+        "inputs": {
+          "policy": "# SupportDesk Store Refund Policy (v3)\n\nThis is a fictional policy for a fictional store, used only as demo data.\n\n## 1. Standard returns\n1.1 Physical items can be returned for a full refund within 30 days of the order date.\n1.2 Returned items must be unused and in their original packaging.\n\n## 2. Damaged or defective items\n2.1 Items that arrive damaged or defective are eligible for a full refund or replacement within 60 days of the order date.\n2.2 Damage reported more than 60 days after the order date is not eligible.\n\n## 3. Exceptions\n3.1 Digital products (e-books, software licenses, gift cards) are non-refundable once downloaded or activated.\n3.2 Items bought on clearance sale are eligible for store credit only, not a cash refund.\n3.3 If an order has not been delivered 14 days after the order date, the customer is eligible for a full refund.\n\n## 4. Missing information\n4.1 If the order ID or order date is missing, the refund cannot be decided. Ask the customer for the missing details.\n",
+          "today": "2026-09-19",
+          "order_info_json": {
+            "order_id": "ORD-10588",
+            "order_date": "2026-08-28"
+          },
+          "subject": "Where is my package??",
+          "body": "Order ORD-10588 placed on 2026-08-28 still hasn't arrived. Tracking hasn't updated in 10 days. This is ridiculous. I want my money back."
+        },
+        "expected": {
+          "is_refund_request": true,
+          "eligible": "yes",
+          "policy_section": "3.3"
+        },
+        "notes": "not delivered, 22 days after order — eligible under section 3.3 (T002)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "{\n  \"reasoning\": \"Since your order was placed on 2026-08-28 and it has not been delivered 14 days later, you are eligible for a full refund according to our policy.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"yes\",\n  \"policy_section\": \"3.3\"\n}",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "all fields match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "{\n  \"reasoning\": \"The order has not been delivered for 14 days after the order date, which qualifies the customer for a full refund under section 3.3 of the refund policy.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"full refund\",\n  \"policy_section\": \"3.3\"\n}",
+            "passed": false,
+            "score": 0.6667,
+            "judge_score": null,
+            "detail": "eligible: expected 'yes', got 'full refund'",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "{\n  \"reasoning\": \"The order was placed on August 28, 2026, and the tracking hasn't updated in 10 days. This is more than 14 days after the order date, so the customer is eligible for a full refund.\",\n  \"is_refund_request\": true,\n  \"eligible\": \"yes\",\n  \"policy_section\": \"3.1\"\n}",
+            "passed": false,
+            "score": 0.6667,
+            "judge_score": null,
+            "detail": "policy_section: expected '3.3', got '3.1'",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "{\"reasoning\": \"The order has not arrived and the tracking hasn't updated in 10 days, which is considered a significant delay. This is a clear indication that the customer's package is missing or damaged.\", \"is_refund_request\": true, \"eligible\": \"store_credit\", \"policy_section\": 2}",
+            "passed": false,
+            "score": 0.3333,
+            "judge_score": null,
+            "detail": "eligible: expected 'yes', got 'store_credit'; policy_section: expected '3.3', got 2",
+            "error": null
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "id": "pol-01",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-02",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-03",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-04",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-05",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-06",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-07",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-09",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-10",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-11",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-12",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-13",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-14",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-15",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-16",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-18",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-19",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-20",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-22",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-23",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-24",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-25",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-26",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-27",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "pol-28",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      }
+    ]
+  },
+  {
+    "site_id": "supportdesk/triage.py::classify_category",
+    "slug": "supportdesk.triage__classify_category",
+    "grading": "exact",
+    "cases": 25,
+    "models": [
+      "qwen2.5:7b",
+      "qwen2.5:3b",
+      "qwen2.5:1.5b",
+      "qwen2.5:0.5b"
+    ],
+    "examples": [
+      {
+        "id": "cat-01",
+        "inputs": {
+          "ticket_text": "Refund request for ORD-10421\n\nHi, I ordered a pair of wireless headphones on 2026-09-02 (order ORD-10421). They're unused and still in the box, but I changed my mind. Can I get a refund?"
+        },
+        "expected": "refund",
+        "notes": "change-of-mind refund request, unused item (T001)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "refund",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "refund",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "refund",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "refund",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "cat-02",
+        "inputs": {
+          "ticket_text": "Where is my package??\n\nOrder ORD-10588 placed on 2026-08-28 still hasn't arrived. Tracking hasn't updated in 10 days. This is ridiculous. I want my money back."
+        },
+        "expected": "refund",
+        "notes": "non-delivery with explicit money-back ask overrides shipping label (T002)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "shipping",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'refund', got 'shipping'",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "billing",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'refund', got 'billing'",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "refund",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "refund",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "cat-03",
+        "inputs": {
+          "ticket_text": "App crashes on login\n\nEvery time I open the SupportDesk Store app on my phone and tap Log in, it crashes. I've reinstalled it twice. App version 4.2.1."
+        },
+        "expected": "technical",
+        "notes": "app crash bug (T003)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "technical",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "Technical",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "technical",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "technical",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "id": "cat-01",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-02",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-03",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-04",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-05",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-06",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-07",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-08",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-09",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-10",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-11",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-12",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-13",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-14",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-15",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-16",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-17",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-18",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-19",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-20",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-21",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-22",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-23",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "cat-24",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "cat-25",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      }
+    ]
+  },
+  {
+    "site_id": "supportdesk/triage.py::detect_sentiment",
+    "slug": "supportdesk.triage__detect_sentiment",
+    "grading": "exact",
+    "cases": 22,
+    "models": [
+      "qwen2.5:7b",
+      "qwen2.5:3b",
+      "qwen2.5:1.5b",
+      "qwen2.5:0.5b"
+    ],
+    "examples": [
+      {
+        "id": "sen-01",
+        "inputs": {
+          "ticket_text": "Thank you!\n\nJust wanted to say the support team was amazing last week. My issue was fixed in minutes. Keep it up!"
+        },
+        "expected": "positive",
+        "notes": "genuine praise, clearly positive (T009)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "Positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "Positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "sen-02",
+        "inputs": {
+          "ticket_text": "Arrived early!\n\nOrder ORD-11533 arrived two days early, great packaging. One question: can I get the tracking history for my records?"
+        },
+        "expected": "positive",
+        "notes": "happy with delivery, minor informational request (T032)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "Positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "Positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "sen-03",
+        "inputs": {
+          "ticket_text": "Update email\n\nHi! Could you help me change the email address on my account? Thanks so much :)"
+        },
+        "expected": "positive",
+        "notes": "polite, friendly tone with smiley (T024)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "Positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "neutral",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'positive', got 'neutral'",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "Positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "Positive",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "id": "sen-01",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-02",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-03",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-04",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-05",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-06",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sen-07",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-08",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-09",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-10",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-11",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sen-12",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-13",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-14",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-15",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-16",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-17",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-18",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-19",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sen-20",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "sen-21",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "sen-22",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      }
+    ]
+  },
+  {
+    "site_id": "supportdesk/triage.py::tag_urgency",
+    "slug": "supportdesk.triage__tag_urgency",
+    "grading": "exact",
+    "cases": 22,
+    "models": [
+      "qwen2.5:7b",
+      "qwen2.5:3b",
+      "qwen2.5:1.5b",
+      "qwen2.5:0.5b"
+    ],
+    "examples": [
+      {
+        "id": "urg-01",
+        "inputs": {
+          "category": "technical",
+          "ticket_text": "App crashes on login\n\nEvery time I open the SupportDesk Store app on my phone and tap Log in, it crashes. I've reinstalled it twice. App version 4.2.1."
+        },
+        "expected": "medium",
+        "notes": "technical bug blocking one user — medium (T003)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "Medium",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "Low",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'medium', got 'low'",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "High",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'medium', got 'high'",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "High",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'medium', got 'high'",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "urg-02",
+        "inputs": {
+          "category": "technical",
+          "ticket_text": "Checkout page down\n\nNobody on our team can check out right now, the payment page returns error 500. We're a business account and need to place a large order today."
+        },
+        "expected": "high",
+        "notes": "service down for many users, large order impact (T020)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "High",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "High",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "High",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "Medium",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'high', got 'medium'",
+            "error": null
+          }
+        }
+      },
+      {
+        "id": "urg-03",
+        "inputs": {
+          "category": "billing",
+          "ticket_text": "Charged twice\n\nI was charged twice for order ORD-10733 on 2026-09-15. Please remove the duplicate charge."
+        },
+        "expected": "high",
+        "notes": "money lost (duplicate charge) — high (T004)",
+        "outputs": {
+          "qwen2.5:7b": {
+            "output": "Medium",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'high', got 'medium'",
+            "error": null
+          },
+          "qwen2.5:3b": {
+            "output": "Medium",
+            "passed": false,
+            "score": 0.0,
+            "judge_score": null,
+            "detail": "expected 'high', got 'medium'",
+            "error": null
+          },
+          "qwen2.5:1.5b": {
+            "output": "High",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          },
+          "qwen2.5:0.5b": {
+            "output": "High",
+            "passed": true,
+            "score": 1.0,
+            "judge_score": null,
+            "detail": "match",
+            "error": null
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "id": "urg-01",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-02",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-03",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "urg-04",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "urg-05",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-06",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-07",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-08",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-09",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "urg-10",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-11",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "urg-12",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      },
+      {
+        "id": "urg-13",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-14",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-15",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-16",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-17",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-18",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": true,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-19",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-20",
+        "passed": {
+          "qwen2.5:7b": false,
+          "qwen2.5:3b": false,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-21",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": false
+        }
+      },
+      {
+        "id": "urg-22",
+        "passed": {
+          "qwen2.5:7b": true,
+          "qwen2.5:3b": true,
+          "qwen2.5:1.5b": false,
+          "qwen2.5:0.5b": true
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,205 @@
+{
+  "labels": {
+    "call_sites": "Call sites",
+    "models_resolved": "Models resolved",
+    "prompts_resolved": "Prompts resolved",
+    "enriched": "Enriched",
+    "found_by_bob": "Found by Bob",
+    "via_helper": "Split from helpers"
+  },
+  "ast": {
+    "call_sites": 7,
+    "models_resolved": 6,
+    "prompts_resolved": 5,
+    "enriched": 0,
+    "found_by_bob": 0,
+    "via_helper": 0
+  },
+  "audit": {
+    "call_sites": 8,
+    "models_resolved": 8,
+    "prompts_resolved": 8,
+    "enriched": 8,
+    "found_by_bob": 3,
+    "via_helper": 2
+  },
+  "ast_after": {
+    "call_sites": 7,
+    "models_resolved": 0,
+    "prompts_resolved": 5,
+    "enriched": 0,
+    "found_by_bob": 0,
+    "via_helper": 0
+  },
+  "changes": [
+    {
+      "id": "supportdesk/agent_assist.py::draft_reply",
+      "kind": "enriched",
+      "detail": "purpose, output_contract, difficulty, grading"
+    },
+    {
+      "id": "supportdesk/agent_assist.py::summarize_for_agent",
+      "kind": "enriched",
+      "detail": "purpose, output_contract, difficulty, grading"
+    },
+    {
+      "id": "supportdesk/extract.py::extract_order_info",
+      "kind": "enriched",
+      "detail": "purpose, output_contract, difficulty, grading"
+    },
+    {
+      "id": "supportdesk/llm.py::ask",
+      "kind": "split",
+      "detail": "into supportdesk/triage.py::detect_sentiment, supportdesk/triage.py::tag_urgency"
+    },
+    {
+      "id": "supportdesk/misc_utils.py::lang_of",
+      "kind": "resolved",
+      "detail": "model resolved: qwen2.5:7b; prompt resolved"
+    },
+    {
+      "id": "supportdesk/policy.py::decide_refund",
+      "kind": "enriched",
+      "detail": "purpose, output_contract, difficulty, grading"
+    },
+    {
+      "id": "supportdesk/triage.py::classify_category",
+      "kind": "enriched",
+      "detail": "purpose, output_contract, difficulty, grading"
+    },
+    {
+      "id": "supportdesk/triage.py::detect_sentiment",
+      "kind": "added",
+      "detail": "via supportdesk/llm.py::ask"
+    },
+    {
+      "id": "supportdesk/triage.py::tag_urgency",
+      "kind": "added",
+      "detail": "via supportdesk/llm.py::ask"
+    }
+  ],
+  "ast_sites": [
+    {
+      "id": "supportdesk/agent_assist.py::summarize_for_agent",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "env_default",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/agent_assist.py::draft_reply",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "env_default",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/extract.py::extract_order_info",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "env_default",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/llm.py::ask",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "env_default",
+      "prompt_resolved": false
+    },
+    {
+      "id": "supportdesk/misc_utils.py::lang_of",
+      "found_by": "ast",
+      "via": null,
+      "model": null,
+      "model_source": "kwargs",
+      "prompt_resolved": false
+    },
+    {
+      "id": "supportdesk/policy.py::decide_refund",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "dict_lookup",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/triage.py::classify_category",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "literal",
+      "prompt_resolved": true
+    }
+  ],
+  "audit_sites": [
+    {
+      "id": "supportdesk/agent_assist.py::draft_reply",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "env_default",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/agent_assist.py::summarize_for_agent",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "env_default",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/extract.py::extract_order_info",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "env_default",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/misc_utils.py::lang_of",
+      "found_by": "bob",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "manual",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/policy.py::decide_refund",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "dict_lookup",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/triage.py::classify_category",
+      "found_by": "ast",
+      "via": null,
+      "model": "qwen2.5:7b",
+      "model_source": "literal",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/triage.py::detect_sentiment",
+      "found_by": "bob",
+      "via": "supportdesk/llm.py::ask",
+      "model": "qwen2.5:7b",
+      "model_source": "manual",
+      "prompt_resolved": true
+    },
+    {
+      "id": "supportdesk/triage.py::tag_urgency",
+      "found_by": "bob",
+      "via": "supportdesk/llm.py::ask",
+      "model": "qwen2.5:7b",
+      "model_source": "manual",
+      "prompt_resolved": true
+    }
+  ]
+}

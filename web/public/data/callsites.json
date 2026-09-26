@@ -1,0 +1,1067 @@
+[
+  {
+    "id": "supportdesk/agent_assist.py::draft_reply",
+    "slug": "supportdesk.agent_assist__draft_reply",
+    "file": "supportdesk/agent_assist.py",
+    "line": 34,
+    "function": "draft_reply",
+    "api": "openai.chat.completions",
+    "is_async": true,
+    "found_by": "ast",
+    "via": null,
+    "purpose": "Draft a customer-facing reply to a support ticket in the customer's detected language.",
+    "output_contract": "Plain-text reply under 120 words, in the language given by the ISO 639-1 code in {language}. Must not promise refunds, credits, delivery dates or specific timeframes (for example '24-48 hours'). Must say that a teammate will confirm next steps.",
+    "difficulty": "hard",
+    "grading": "judge",
+    "output_format": "text",
+    "temperature": 0.0,
+    "max_tokens": 250,
+    "model_in_code": "qwen2.5:7b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a friendly, concise customer support agent for SupportDesk Store. Never promise refunds, credits, or delivery dates. Say a teammate will confirm next steps. Keep replies under 120 words.",
+        "resolved": true
+      },
+      {
+        "role": "user",
+        "content": "Reply language (ISO 639-1): {language}\nAgent summary: {summary}\n\nCustomer subject: {subject}\nCustomer message:\n{body}",
+        "resolved": true
+      }
+    ],
+    "eval_cases": 22,
+    "decision": {
+      "action": "keep",
+      "model": "qwen2.5:7b",
+      "baseline": "qwen2.5:7b",
+      "reason": "no cheaper model passed the checks",
+      "baseline_pass_rate": 0.1364,
+      "baseline_below_floor": true
+    },
+    "models": [
+      {
+        "model": "qwen2.5:7b",
+        "tier": "premium",
+        "is_baseline": true,
+        "chosen": true,
+        "cases": 22,
+        "scored": 22,
+        "passed": 3,
+        "errors": 0,
+        "pass_rate": 0.1364,
+        "mean_score": 0.4432,
+        "avg_judge_score": 2.77,
+        "avg_prompt_tokens": 152.9,
+        "avg_completion_tokens": 50.4,
+        "avg_latency_s": 3.257,
+        "cost_per_call": 0.00088625,
+        "check": null
+      },
+      {
+        "model": "qwen2.5:3b",
+        "tier": "standard",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 2,
+        "errors": 0,
+        "pass_rate": 0.0909,
+        "mean_score": 0.2614,
+        "avg_judge_score": 2.05,
+        "avg_prompt_tokens": 152.9,
+        "avg_completion_tokens": 24.0,
+        "avg_latency_s": 0.874,
+        "cost_per_call": 9.962e-05,
+        "check": {
+          "ratio": 0.6667,
+          "passed": false,
+          "reason": "keeps 67% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:1.5b",
+        "tier": "budget",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 1,
+        "errors": 0,
+        "pass_rate": 0.0455,
+        "mean_score": 0.2841,
+        "avg_judge_score": 2.14,
+        "avg_prompt_tokens": 152.9,
+        "avg_completion_tokens": 44.8,
+        "avg_latency_s": 1.132,
+        "cost_per_call": 4.979e-05,
+        "check": {
+          "ratio": 0.3333,
+          "passed": false,
+          "reason": "keeps 33% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:0.5b",
+        "tier": "nano",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 0,
+        "errors": 0,
+        "pass_rate": 0.0,
+        "mean_score": 0.1477,
+        "avg_judge_score": 1.59,
+        "avg_prompt_tokens": 152.9,
+        "avg_completion_tokens": 38.9,
+        "avg_latency_s": 0.434,
+        "cost_per_call": 3.085e-05,
+        "check": {
+          "ratio": 0.0,
+          "passed": false,
+          "reason": "keeps 0% of baseline quality, needs 95%"
+        }
+      }
+    ],
+    "cost": {
+      "before_model": "qwen2.5:7b",
+      "after_model": "qwen2.5:7b",
+      "calls_per_day": 20000,
+      "before_monthly": 531.75,
+      "after_monthly": 531.75,
+      "savings": 0.0,
+      "savings_pct": 0.0
+    }
+  },
+  {
+    "id": "supportdesk/agent_assist.py::summarize_for_agent",
+    "slug": "supportdesk.agent_assist__summarize_for_agent",
+    "file": "supportdesk/agent_assist.py",
+    "line": 23,
+    "function": "summarize_for_agent",
+    "api": "openai.chat.completions",
+    "is_async": false,
+    "found_by": "ast",
+    "via": null,
+    "purpose": "Produce a two-sentence English summary of a support ticket for a human agent.",
+    "output_contract": "Exactly 2 short sentences in English. Sentence 1: what the customer wants. Sentence 2: the key details (order ID, dates, amounts) when the ticket has them. Must not invent details that are not in the ticket.",
+    "difficulty": "medium",
+    "grading": "judge",
+    "output_format": "text",
+    "temperature": 0.0,
+    "max_tokens": 120,
+    "model_in_code": "qwen2.5:7b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Summarize this support ticket for a human support agent.\nWrite exactly 2 short sentences in English: what the customer wants,\nand the key details (order ID, dates, amounts) if present.\n\nSubject: {subject}\nMessage:\n{body}\n",
+        "resolved": true
+      }
+    ],
+    "eval_cases": 22,
+    "decision": {
+      "action": "keep",
+      "model": "qwen2.5:7b",
+      "baseline": "qwen2.5:7b",
+      "reason": "no cheaper model passed the checks",
+      "baseline_pass_rate": 0.5909,
+      "baseline_below_floor": true
+    },
+    "models": [
+      {
+        "model": "qwen2.5:7b",
+        "tier": "premium",
+        "is_baseline": true,
+        "chosen": true,
+        "cases": 22,
+        "scored": 22,
+        "passed": 13,
+        "errors": 0,
+        "pass_rate": 0.5909,
+        "mean_score": 0.6591,
+        "avg_judge_score": 3.64,
+        "avg_prompt_tokens": 114.5,
+        "avg_completion_tokens": 38.1,
+        "avg_latency_s": 2.516,
+        "cost_per_call": 0.00066773,
+        "check": null
+      },
+      {
+        "model": "qwen2.5:3b",
+        "tier": "standard",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 5,
+        "errors": 0,
+        "pass_rate": 0.2273,
+        "mean_score": 0.3523,
+        "avg_judge_score": 2.41,
+        "avg_prompt_tokens": 114.5,
+        "avg_completion_tokens": 40.8,
+        "avg_latency_s": 1.273,
+        "cost_per_call": 0.00011113,
+        "check": {
+          "ratio": 0.3846,
+          "passed": false,
+          "reason": "keeps 38% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:1.5b",
+        "tier": "budget",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 0,
+        "errors": 0,
+        "pass_rate": 0.0,
+        "mean_score": 0.0341,
+        "avg_judge_score": 1.14,
+        "avg_prompt_tokens": 114.5,
+        "avg_completion_tokens": 66.1,
+        "avg_latency_s": 1.377,
+        "cost_per_call": 5.684e-05,
+        "check": {
+          "ratio": 0.0,
+          "passed": false,
+          "reason": "keeps 0% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:0.5b",
+        "tier": "nano",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 1,
+        "errors": 0,
+        "pass_rate": 0.0455,
+        "mean_score": 0.1023,
+        "avg_judge_score": 1.41,
+        "avg_prompt_tokens": 114.5,
+        "avg_completion_tokens": 40.3,
+        "avg_latency_s": 0.406,
+        "cost_per_call": 2.756e-05,
+        "check": {
+          "ratio": 0.0769,
+          "passed": false,
+          "reason": "keeps 8% of baseline quality, needs 95%"
+        }
+      }
+    ],
+    "cost": {
+      "before_model": "qwen2.5:7b",
+      "after_model": "qwen2.5:7b",
+      "calls_per_day": 20000,
+      "before_monthly": 400.64,
+      "after_monthly": 400.64,
+      "savings": 0.0,
+      "savings_pct": 0.0
+    }
+  },
+  {
+    "id": "supportdesk/extract.py::extract_order_info",
+    "slug": "supportdesk.extract__extract_order_info",
+    "file": "supportdesk/extract.py",
+    "line": 21,
+    "function": "extract_order_info",
+    "api": "openai.chat.completions",
+    "is_async": false,
+    "found_by": "ast",
+    "via": null,
+    "purpose": "Extract order ID and order date from a support ticket body.",
+    "output_contract": "JSON object with exactly two keys: `order_id` (string matching ORD-\\d+ or null) and `order_date` (string in YYYY-MM-DD format or null); no additional keys; values must be null when not explicitly stated. Graded fields: order_id, order_date.",
+    "difficulty": "medium",
+    "grading": "json_fields",
+    "output_format": "json",
+    "temperature": 0.0,
+    "max_tokens": 60,
+    "model_in_code": "qwen2.5:7b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "Extract the order ID and the order date from the support ticket.\nOrder IDs look like ORD-12345.\nReturn JSON with exactly two keys: order_id and order_date.\norder_date must be YYYY-MM-DD. Use null for anything not stated explicitly.",
+        "resolved": true
+      },
+      {
+        "role": "user",
+        "content": "{ticket_text}",
+        "resolved": true
+      }
+    ],
+    "eval_cases": 21,
+    "decision": {
+      "action": "downgrade",
+      "model": "qwen2.5:3b",
+      "baseline": "qwen2.5:7b",
+      "reason": "keeps 105% of baseline quality and costs less",
+      "baseline_pass_rate": 0.9524,
+      "baseline_below_floor": false
+    },
+    "models": [
+      {
+        "model": "qwen2.5:7b",
+        "tier": "premium",
+        "is_baseline": true,
+        "chosen": false,
+        "cases": 21,
+        "scored": 21,
+        "passed": 20,
+        "errors": 0,
+        "pass_rate": 0.9524,
+        "mean_score": 0.9762,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 105.4,
+        "avg_completion_tokens": 29.5,
+        "avg_latency_s": 2.153,
+        "cost_per_call": 0.00055833,
+        "check": null
+      },
+      {
+        "model": "qwen2.5:3b",
+        "tier": "standard",
+        "is_baseline": false,
+        "chosen": true,
+        "cases": 21,
+        "scored": 21,
+        "passed": 21,
+        "errors": 0,
+        "pass_rate": 1.0,
+        "mean_score": 1.0,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 105.4,
+        "avg_completion_tokens": 28.8,
+        "avg_latency_s": 0.915,
+        "cost_per_call": 8.827e-05,
+        "check": {
+          "ratio": 1.05,
+          "passed": true,
+          "reason": "keeps 105% of baseline quality and costs less"
+        }
+      },
+      {
+        "model": "qwen2.5:1.5b",
+        "tier": "budget",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 21,
+        "scored": 21,
+        "passed": 17,
+        "errors": 0,
+        "pass_rate": 0.8095,
+        "mean_score": 0.9048,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 105.4,
+        "avg_completion_tokens": 30.3,
+        "avg_latency_s": 0.711,
+        "cost_per_call": 3.401e-05,
+        "check": {
+          "ratio": 0.85,
+          "passed": false,
+          "reason": "keeps 85% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:0.5b",
+        "tier": "nano",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 21,
+        "scored": 21,
+        "passed": 15,
+        "errors": 0,
+        "pass_rate": 0.7143,
+        "mean_score": 0.8333,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 105.4,
+        "avg_completion_tokens": 28.1,
+        "avg_latency_s": 0.33,
+        "cost_per_call": 2.18e-05,
+        "check": {
+          "ratio": 0.75,
+          "passed": false,
+          "reason": "keeps 75% of baseline quality, needs 95%"
+        }
+      }
+    ],
+    "cost": {
+      "before_model": "qwen2.5:7b",
+      "after_model": "qwen2.5:3b",
+      "calls_per_day": 20000,
+      "before_monthly": 335.0,
+      "after_monthly": 52.96,
+      "savings": 282.04,
+      "savings_pct": 0.8419
+    }
+  },
+  {
+    "id": "supportdesk/misc_utils.py::lang_of",
+    "slug": "supportdesk.misc_utils__lang_of",
+    "file": "supportdesk/misc_utils.py",
+    "line": 25,
+    "function": "lang_of",
+    "api": "openai.chat.completions",
+    "is_async": false,
+    "found_by": "bob",
+    "via": null,
+    "purpose": "Detect the language of a support ticket and return the ISO 639-1 two-letter code.",
+    "output_contract": "Exactly one two-letter lowercase ISO 639-1 code (e.g. 'en', 'es', 'fr'); no punctuation, no extra words; caller takes only the first two characters of the response.",
+    "difficulty": "easy",
+    "grading": "exact",
+    "output_format": "text",
+    "temperature": 0.0,
+    "max_tokens": 5,
+    "model_in_code": "qwen2.5:7b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which language is this text written in? Reply with the two-letter ISO 639-1 code only (for example: en, es, fr).\n\nText:\n{text}",
+        "resolved": true
+      }
+    ],
+    "eval_cases": 22,
+    "decision": {
+      "action": "downgrade",
+      "model": "qwen2.5:1.5b",
+      "baseline": "qwen2.5:7b",
+      "reason": "keeps 100% of baseline quality and costs less",
+      "baseline_pass_rate": 0.9091,
+      "baseline_below_floor": false
+    },
+    "models": [
+      {
+        "model": "qwen2.5:7b",
+        "tier": "premium",
+        "is_baseline": true,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 20,
+        "errors": 0,
+        "pass_rate": 0.9091,
+        "mean_score": 0.9091,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 108.2,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.427,
+        "cost_per_call": 0.00029057,
+        "check": null
+      },
+      {
+        "model": "qwen2.5:3b",
+        "tier": "standard",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 18,
+        "errors": 0,
+        "pass_rate": 0.8182,
+        "mean_score": 0.8182,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 108.2,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.187,
+        "cost_per_call": 4.649e-05,
+        "check": {
+          "ratio": 0.9,
+          "passed": false,
+          "reason": "keeps 90% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:1.5b",
+        "tier": "budget",
+        "is_baseline": false,
+        "chosen": true,
+        "cases": 22,
+        "scored": 22,
+        "passed": 20,
+        "errors": 0,
+        "pass_rate": 0.9091,
+        "mean_score": 0.9091,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 108.2,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.141,
+        "cost_per_call": 1.743e-05,
+        "check": {
+          "ratio": 1.0,
+          "passed": true,
+          "reason": "keeps 100% of baseline quality and costs less"
+        }
+      },
+      {
+        "model": "qwen2.5:0.5b",
+        "tier": "nano",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 18,
+        "errors": 0,
+        "pass_rate": 0.8182,
+        "mean_score": 0.8182,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 108.2,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.06,
+        "cost_per_call": 1.162e-05,
+        "check": {
+          "ratio": 0.9,
+          "passed": false,
+          "reason": "keeps 90% of baseline quality, needs 95%"
+        }
+      }
+    ],
+    "cost": {
+      "before_model": "qwen2.5:7b",
+      "after_model": "qwen2.5:1.5b",
+      "calls_per_day": 20000,
+      "before_monthly": 174.34,
+      "after_monthly": 10.46,
+      "savings": 163.88,
+      "savings_pct": 0.94
+    }
+  },
+  {
+    "id": "supportdesk/policy.py::decide_refund",
+    "slug": "supportdesk.policy__decide_refund",
+    "file": "supportdesk/policy.py",
+    "line": 22,
+    "function": "decide_refund",
+    "api": "openai.chat.completions",
+    "is_async": false,
+    "found_by": "ast",
+    "via": null,
+    "purpose": "Apply the store refund policy to a ticket and return a structured eligibility decision.",
+    "output_contract": "JSON object with exactly four keys in order: reasoning (string, 1-3 sentences), is_refund_request (boolean), eligible (one of \"yes\", \"no\", \"store_credit\", \"need_info\"), policy_section (string like \"2.1\", or null). When is_refund_request is false, eligible must be \"no\" and policy_section must be null. Graded fields: is_refund_request, eligible, policy_section, which must match the refund policy applied to the order date and today's date. reasoning is not graded.",
+    "difficulty": "hard",
+    "grading": "json_fields",
+    "output_format": "json",
+    "temperature": 0.0,
+    "max_tokens": 220,
+    "model_in_code": "qwen2.5:7b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a refund policy assistant. Apply the policy exactly as written. Count days carefully between the order date and today's date.",
+        "resolved": true
+      },
+      {
+        "role": "user",
+        "content": "Refund policy:\n{policy}\n\nToday's date: {today}\nExtracted order info: {order_info_json}\n\nTicket subject: {subject}\nTicket message:\n{body}\n\nReturn JSON with these keys, in this order:\n  \"reasoning\": 1-3 sentences applying the policy,\n  \"is_refund_request\": true or false,\n  \"eligible\": \"yes\", \"no\", \"store_credit\", or \"need_info\",\n  \"policy_section\": the section number you applied, e.g. \"2.1\".\nIf it is not a refund request, set eligible to \"no\" and policy_section to null.",
+        "resolved": true
+      }
+    ],
+    "eval_cases": 25,
+    "decision": {
+      "action": "keep",
+      "model": "qwen2.5:7b",
+      "baseline": "qwen2.5:7b",
+      "reason": "no cheaper model passed the checks",
+      "baseline_pass_rate": 0.4,
+      "baseline_below_floor": true
+    },
+    "models": [
+      {
+        "model": "qwen2.5:7b",
+        "tier": "premium",
+        "is_baseline": true,
+        "chosen": true,
+        "cases": 25,
+        "scored": 25,
+        "passed": 10,
+        "errors": 0,
+        "pass_rate": 0.4,
+        "mean_score": 0.6267,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 476.5,
+        "avg_completion_tokens": 83.0,
+        "avg_latency_s": 6.821,
+        "cost_per_call": 0.0020212,
+        "check": null
+      },
+      {
+        "model": "qwen2.5:3b",
+        "tier": "standard",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 25,
+        "scored": 25,
+        "passed": 10,
+        "errors": 0,
+        "pass_rate": 0.4,
+        "mean_score": 0.6933,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 476.5,
+        "avg_completion_tokens": 79.7,
+        "avg_latency_s": 2.64,
+        "cost_per_call": 0.00031808,
+        "check": {
+          "ratio": 1.0,
+          "passed": false,
+          "reason": "pass rate 40% is below the floor 80%"
+        }
+      },
+      {
+        "model": "qwen2.5:1.5b",
+        "tier": "budget",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 25,
+        "scored": 25,
+        "passed": 7,
+        "errors": 0,
+        "pass_rate": 0.28,
+        "mean_score": 0.6133,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 476.5,
+        "avg_completion_tokens": 82.1,
+        "avg_latency_s": 1.95,
+        "cost_per_call": 0.00012074,
+        "check": {
+          "ratio": 0.7,
+          "passed": false,
+          "reason": "keeps 70% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:0.5b",
+        "tier": "nano",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 25,
+        "scored": 25,
+        "passed": 0,
+        "errors": 0,
+        "pass_rate": 0.0,
+        "mean_score": 0.3733,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 476.5,
+        "avg_completion_tokens": 70.0,
+        "avg_latency_s": 0.749,
+        "cost_per_call": 7.566e-05,
+        "check": {
+          "ratio": 0.0,
+          "passed": false,
+          "reason": "keeps 0% of baseline quality, needs 95%"
+        }
+      }
+    ],
+    "cost": {
+      "before_model": "qwen2.5:7b",
+      "after_model": "qwen2.5:7b",
+      "calls_per_day": 20000,
+      "before_monthly": 1212.72,
+      "after_monthly": 1212.72,
+      "savings": 0.0,
+      "savings_pct": 0.0
+    }
+  },
+  {
+    "id": "supportdesk/triage.py::classify_category",
+    "slug": "supportdesk.triage__classify_category",
+    "file": "supportdesk/triage.py",
+    "line": 12,
+    "function": "classify_category",
+    "api": "openai.chat.completions",
+    "is_async": false,
+    "found_by": "ast",
+    "via": null,
+    "purpose": "Classify a support ticket into exactly one of six predefined categories.",
+    "output_contract": "Exactly one lowercase word from the set {billing, shipping, technical, account, refund, other}; no punctuation, no extra words; max_tokens is 5.",
+    "difficulty": "easy",
+    "grading": "exact",
+    "output_format": "text",
+    "temperature": 0.0,
+    "max_tokens": 5,
+    "model_in_code": "qwen2.5:7b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a support ticket classifier.",
+        "resolved": true
+      },
+      {
+        "role": "user",
+        "content": "Classify this support ticket into exactly one category: billing, shipping, technical, account, refund, other.\nReply with the category name only.\n\nTicket:\n{ticket_text}",
+        "resolved": true
+      }
+    ],
+    "eval_cases": 25,
+    "decision": {
+      "action": "keep",
+      "model": "qwen2.5:7b",
+      "baseline": "qwen2.5:7b",
+      "reason": "no cheaper model passed the checks",
+      "baseline_pass_rate": 0.84,
+      "baseline_below_floor": false
+    },
+    "models": [
+      {
+        "model": "qwen2.5:7b",
+        "tier": "premium",
+        "is_baseline": true,
+        "chosen": true,
+        "cases": 25,
+        "scored": 25,
+        "passed": 21,
+        "errors": 0,
+        "pass_rate": 0.84,
+        "mean_score": 0.84,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 85.6,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.334,
+        "cost_per_call": 0.000234,
+        "check": null
+      },
+      {
+        "model": "qwen2.5:3b",
+        "tier": "standard",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 25,
+        "scored": 25,
+        "passed": 16,
+        "errors": 0,
+        "pass_rate": 0.64,
+        "mean_score": 0.64,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 85.6,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.168,
+        "cost_per_call": 3.75e-05,
+        "check": {
+          "ratio": 0.7619,
+          "passed": false,
+          "reason": "keeps 76% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:1.5b",
+        "tier": "budget",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 25,
+        "scored": 25,
+        "passed": 18,
+        "errors": 0,
+        "pass_rate": 0.72,
+        "mean_score": 0.72,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 85.6,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.124,
+        "cost_per_call": 1.404e-05,
+        "check": {
+          "ratio": 0.8571,
+          "passed": false,
+          "reason": "keeps 86% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:0.5b",
+        "tier": "nano",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 25,
+        "scored": 25,
+        "passed": 12,
+        "errors": 0,
+        "pass_rate": 0.48,
+        "mean_score": 0.48,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 85.6,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.051,
+        "cost_per_call": 9.36e-06,
+        "check": {
+          "ratio": 0.5714,
+          "passed": false,
+          "reason": "keeps 57% of baseline quality, needs 95%"
+        }
+      }
+    ],
+    "cost": {
+      "before_model": "qwen2.5:7b",
+      "after_model": "qwen2.5:7b",
+      "calls_per_day": 20000,
+      "before_monthly": 140.4,
+      "after_monthly": 140.4,
+      "savings": 0.0,
+      "savings_pct": 0.0
+    }
+  },
+  {
+    "id": "supportdesk/triage.py::detect_sentiment",
+    "slug": "supportdesk.triage__detect_sentiment",
+    "file": "supportdesk/triage.py",
+    "line": 34,
+    "function": "detect_sentiment",
+    "api": "openai.chat.completions",
+    "is_async": false,
+    "found_by": "bob",
+    "via": "supportdesk/llm.py::ask",
+    "purpose": "Classify the customer's overall sentiment in a support ticket as positive, neutral, or negative.",
+    "output_contract": "Exactly one lowercase word from the set {positive, neutral, negative}; caller strips trailing period and lowercases; max_tokens is 3.",
+    "difficulty": "easy",
+    "grading": "exact",
+    "output_format": "text",
+    "temperature": 0.0,
+    "max_tokens": 3,
+    "model_in_code": "qwen2.5:7b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the customer's overall sentiment? Reply with one word: positive, neutral, or negative.\n\nTicket:\n{ticket_text}",
+        "resolved": true
+      }
+    ],
+    "eval_cases": 22,
+    "decision": {
+      "action": "downgrade",
+      "model": "qwen2.5:3b",
+      "baseline": "qwen2.5:7b",
+      "reason": "keeps 100% of baseline quality and costs less",
+      "baseline_pass_rate": 0.9091,
+      "baseline_below_floor": false
+    },
+    "models": [
+      {
+        "model": "qwen2.5:7b",
+        "tier": "premium",
+        "is_baseline": true,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 20,
+        "errors": 0,
+        "pass_rate": 0.9091,
+        "mean_score": 0.9091,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 86.2,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.391,
+        "cost_per_call": 0.00023557,
+        "check": null
+      },
+      {
+        "model": "qwen2.5:3b",
+        "tier": "standard",
+        "is_baseline": false,
+        "chosen": true,
+        "cases": 22,
+        "scored": 22,
+        "passed": 20,
+        "errors": 0,
+        "pass_rate": 0.9091,
+        "mean_score": 0.9091,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 86.2,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.171,
+        "cost_per_call": 3.769e-05,
+        "check": {
+          "ratio": 1.0,
+          "passed": true,
+          "reason": "keeps 100% of baseline quality and costs less"
+        }
+      },
+      {
+        "model": "qwen2.5:1.5b",
+        "tier": "budget",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 14,
+        "errors": 0,
+        "pass_rate": 0.6364,
+        "mean_score": 0.6364,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 86.2,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.109,
+        "cost_per_call": 1.413e-05,
+        "check": {
+          "ratio": 0.7,
+          "passed": false,
+          "reason": "keeps 70% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:0.5b",
+        "tier": "nano",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 18,
+        "errors": 0,
+        "pass_rate": 0.8182,
+        "mean_score": 0.8182,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 86.2,
+        "avg_completion_tokens": 2.1,
+        "avg_latency_s": 0.044,
+        "cost_per_call": 9.48e-06,
+        "check": {
+          "ratio": 0.9,
+          "passed": false,
+          "reason": "keeps 90% of baseline quality, needs 95%"
+        }
+      }
+    ],
+    "cost": {
+      "before_model": "qwen2.5:7b",
+      "after_model": "qwen2.5:3b",
+      "calls_per_day": 20000,
+      "before_monthly": 141.34,
+      "after_monthly": 22.61,
+      "savings": 118.73,
+      "savings_pct": 0.84
+    }
+  },
+  {
+    "id": "supportdesk/triage.py::tag_urgency",
+    "slug": "supportdesk.triage__tag_urgency",
+    "file": "supportdesk/triage.py",
+    "line": 54,
+    "function": "tag_urgency",
+    "api": "openai.chat.completions",
+    "is_async": false,
+    "found_by": "bob",
+    "via": "supportdesk/llm.py::ask",
+    "purpose": "Rate the urgency of a support ticket as low, medium, or high based on its category and content.",
+    "output_contract": "Exactly one lowercase word from the set {low, medium, high}; caller strips trailing period and lowercases; max_tokens is 3.",
+    "difficulty": "easy",
+    "grading": "exact",
+    "output_format": "text",
+    "temperature": 0.0,
+    "max_tokens": 3,
+    "model_in_code": "qwen2.5:7b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a support operations lead.",
+        "resolved": true
+      },
+      {
+        "role": "user",
+        "content": "This is a '{category}' support ticket.\nRate its urgency as low, medium, or high.\nHigh: money lost, service down for many users, or a very angry repeat contact.\nMedium: an order or account problem that blocks the customer.\nLow: questions, feedback, and requests with no time pressure.\nReply with one word.\n\nTicket:\n{ticket_text}",
+        "resolved": true
+      }
+    ],
+    "eval_cases": 22,
+    "decision": {
+      "action": "keep",
+      "model": "qwen2.5:7b",
+      "baseline": "qwen2.5:7b",
+      "reason": "no cheaper model passed the checks",
+      "baseline_pass_rate": 0.7273,
+      "baseline_below_floor": true
+    },
+    "models": [
+      {
+        "model": "qwen2.5:7b",
+        "tier": "premium",
+        "is_baseline": true,
+        "chosen": true,
+        "cases": 22,
+        "scored": 22,
+        "passed": 16,
+        "errors": 0,
+        "pass_rate": 0.7273,
+        "mean_score": 0.7273,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 126.0,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.511,
+        "cost_per_call": 0.00033511,
+        "check": null
+      },
+      {
+        "model": "qwen2.5:3b",
+        "tier": "standard",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 11,
+        "errors": 0,
+        "pass_rate": 0.5,
+        "mean_score": 0.5,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 126.0,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.21,
+        "cost_per_call": 5.362e-05,
+        "check": {
+          "ratio": 0.6875,
+          "passed": false,
+          "reason": "keeps 69% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:1.5b",
+        "tier": "budget",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 9,
+        "errors": 0,
+        "pass_rate": 0.4091,
+        "mean_score": 0.4091,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 126.0,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.122,
+        "cost_per_call": 2.011e-05,
+        "check": {
+          "ratio": 0.5625,
+          "passed": false,
+          "reason": "keeps 56% of baseline quality, needs 95%"
+        }
+      },
+      {
+        "model": "qwen2.5:0.5b",
+        "tier": "nano",
+        "is_baseline": false,
+        "chosen": false,
+        "cases": 22,
+        "scored": 22,
+        "passed": 6,
+        "errors": 0,
+        "pass_rate": 0.2727,
+        "mean_score": 0.2727,
+        "avg_judge_score": null,
+        "avg_prompt_tokens": 126.0,
+        "avg_completion_tokens": 2.0,
+        "avg_latency_s": 0.048,
+        "cost_per_call": 1.342e-05,
+        "check": {
+          "ratio": 0.375,
+          "passed": false,
+          "reason": "keeps 37% of baseline quality, needs 95%"
+        }
+      }
+    ],
+    "cost": {
+      "before_model": "qwen2.5:7b",
+      "after_model": "qwen2.5:7b",
+      "calls_per_day": 20000,
+      "before_monthly": 201.07,
+      "after_monthly": 201.07,
+      "savings": 0.0,
+      "savings_pct": 0.0
+    }
+  }
+]

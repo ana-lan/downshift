@@ -1,0 +1,75 @@
+{
+  "project": "supportdesk",
+  "tool_version": "0.1.0.dev0",
+  "baseline": "qwen2.5:7b",
+  "candidates": [
+    "qwen2.5:3b",
+    "qwen2.5:1.5b",
+    "qwen2.5:0.5b"
+  ],
+  "judge_models": [
+    "openai/gpt-oss-120b"
+  ],
+  "threshold": 0.95,
+  "min_pass_rate": 0.8,
+  "calls_per_day": 20000,
+  "days_per_month": 30,
+  "sites_total": 8,
+  "sites_downgraded": 3,
+  "downgrades": [
+    {
+      "site_id": "supportdesk/extract.py::extract_order_info",
+      "from": "qwen2.5:7b",
+      "to": "qwen2.5:3b"
+    },
+    {
+      "site_id": "supportdesk/misc_utils.py::lang_of",
+      "from": "qwen2.5:7b",
+      "to": "qwen2.5:1.5b"
+    },
+    {
+      "site_id": "supportdesk/triage.py::detect_sentiment",
+      "from": "qwen2.5:7b",
+      "to": "qwen2.5:3b"
+    }
+  ],
+  "missing_evals": [],
+  "cost": {
+    "before_monthly": 3137.26,
+    "after_monthly": 2572.61,
+    "savings": 564.65,
+    "savings_pct": 0.18
+  },
+  "quality": {
+    "baseline_pass_rate": 0.6831,
+    "after_pass_rate": 0.6891,
+    "delta": 0.006
+  },
+  "pricing": [
+    {
+      "model": "qwen2.5:7b",
+      "input_per_mtok": 2.5,
+      "output_per_mtok": 10.0,
+      "tier": "premium"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "input_per_mtok": 0.4,
+      "output_per_mtok": 1.6,
+      "tier": "standard"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "input_per_mtok": 0.15,
+      "output_per_mtok": 0.6,
+      "tier": "budget"
+    },
+    {
+      "model": "qwen2.5:0.5b",
+      "input_per_mtok": 0.1,
+      "output_per_mtok": 0.4,
+      "tier": "nano"
+    }
+  ],
+  "disclaimer": "Dollar figures are projections: measured token counts x illustrative per-model prices x an assumed call volume, all set in downshift.yaml. They are not a real bill."
+}
