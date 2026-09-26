@@ -1,0 +1,117 @@
+name: Downshift cost diff
+description: Comment the projected monthly LLM cost change of every pull request.
+author: ana-lan
+branding:
+  icon: trending-down
+  color: green
+
+inputs:
+  path:
+    description: Directory to scan, relative to the repo root.
+    default: "."
+  base:
+    description: Git ref to compare against. Default is the PR base branch (origin/<base>), else origin/main.
+    default: ""
+  config:
+    description: Path to downshift.yaml. Default is downshift.yaml inside path.
+    default: ""
+  fail-above:
+    description: Fail the check if the projected monthly increase is above this many dollars. Empty never fails.
+    default: ""
+  comment:
+    description: Post or update a PR comment with the diff ("true" or "false").
+    default: "true"
+  package:
+    description: pip install target for downshift, e.g. a version spec, or "." for the checked out source.
+    default: "downshift>=0.1.0.dev0"
+  python-version:
+    description: Python version used to run downshift.
+    default: "3.12"
+  github-token:
+    description: Token used to post the PR comment.
+    default: ${{ github.token }}
+
+outputs:
+  report:
+    description: Path to the markdown diff.
+    value: ${{ steps.diff.outputs.report }}
+  exit-code:
+    description: Exit code of downshift diff (0 ok, 1 above fail-above).
+    value: ${{ steps.diff.outputs.exit-code }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install downshift
+      shell: bash
+      env:
+        PACKAGE: ${{ inputs.package }}
+      run: python -m pip install --quiet "$PACKAGE"
+
+    - name: Resolve base ref
+      id: base
+      shell: bash
+      env:
+        BASE_INPUT: ${{ inputs.base }}
+      run: |
+        if [ -n "$BASE_INPUT" ]; then
+          echo "ref=$BASE_INPUT" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        branch="${GITHUB_BASE_REF:-main}"
+        git fetch --no-tags --depth=1 origin "+refs/heads/$branch:refs/remotes/origin/$branch"
+        echo "ref=origin/$branch" >> "$GITHUB_OUTPUT"
+
+    - name: Run downshift diff
+      id: diff
+      shell: bash
+      env:
+        DS_PATH: ${{ inputs.path }}
+        DS_BASE: ${{ steps.base.outputs.ref }}
+        DS_CONFIG: ${{ inputs.config }}
+        DS_FAIL_ABOVE: ${{ inputs.fail-above }}
+      run: |
+        report="$RUNNER_TEMP/downshift-diff.md"
+        args=(diff "$DS_PATH" --base "$DS_BASE" --out "$report")
+        if [ -n "$DS_CONFIG" ]; then args+=(--config "$DS_CONFIG"); fi
+        if [ -n "$DS_FAIL_ABOVE" ]; then args+=(--fail-above "$DS_FAIL_ABOVE"); fi
+        set +e
+        downshift "${args[@]}"
+        code=$?
+        set -e
+        echo "report=$report" >> "$GITHUB_OUTPUT"
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then exit "$code"; fi
+        cat "$report" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Comment on the pull request
+      if: inputs.comment == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPORT: ${{ steps.diff.outputs.report }}
+        PR: ${{ github.event.pull_request.number }}
+      run: |
+        marker="<!-- downshift-diff -->"
+        body="$RUNNER_TEMP/downshift-comment.md"
+        { echo "$marker"; cat "$REPORT"; } > "$body"
+        id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+          --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n 1)
+        if [ -n "$id" ]; then
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@"$body" > /dev/null
+        else
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@"$body" > /dev/null
+        fi || echo "::warning::Could not post the Downshift comment (fork PR or missing permissions)."
+
+    - name: Enforce fail-above
+      if: steps.diff.outputs.exit-code == '1'
+      shell: bash
+      env:
+        LIMIT: ${{ inputs.fail-above }}
+      run: |
+        echo "::error::Projected monthly LLM cost increase is above fail-above (\$$LIMIT)."
+        exit 1
