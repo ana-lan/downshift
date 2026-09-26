@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --bg: #f7fafc;
+  --panel: #ffffff;
+  --card: #eef3f8;
+  --line: #dbe3ec;
+  --line-soft: #e9eef4;
+  --text: #334155;
+  --heading: #0b1220;
+  --muted: #475569;
+  --subtle: #64748b;
+  --cyan: #0891b2;
+  --teal: #0d9488;
+  --blue: #2563eb;
+  --violet: #7c3aed;
+  --rose: #e11d48;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #070b14;
+  --panel: #0a101c;
+  --card: #0d1422;
+  --line: #1c2638;
+  --line-soft: #131b2a;
+  --text: #c9d4e5;
+  --heading: #f1f5fb;
+  --muted: #9aa8bd;
+  --subtle: #6b7a92;
+  --cyan: #22d3ee;
+  --teal: #2dd4bf;
+  --blue: #60a5fa;
+  --violet: #a78bfa;
+  --rose: #fb7185;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-text: var(--text);
+  --color-heading: var(--heading);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-cyan: var(--cyan);
+  --color-teal: var(--teal);
+  --color-blue: var(--blue);
+  --color-violet: var(--violet);
+  --color-rose: var(--rose);
+  --color-accent: var(--cyan);
+  --color-accent-2: var(--violet);
+  --color-accent-bg: color-mix(in oklab, var(--violet) 14%, transparent);
+  --color-accent-line: color-mix(in oklab, var(--violet) 40%, transparent);
+  --color-accent-fg: var(--violet);
+  --color-good: var(--teal);
+  --color-warn: var(--blue);
+  --color-bad: var(--rose);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+}
+
+@utility text-brand {
+  background-image: linear-gradient(90deg, var(--cyan), var(--blue) 55%, var(--violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-brand {
+  background-image: linear-gradient(90deg, var(--cyan), var(--blue) 55%, var(--violet));
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
