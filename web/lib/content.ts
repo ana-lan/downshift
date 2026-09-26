@@ -42,20 +42,24 @@ jobs:
           github-token: \${{ secrets.GITHUB_TOKEN }}`;
 
 export const PIPELINE_ASCII = `your repo
-   │
-   ▼
-downshift scan ──► call sites (ast) ──► Bob auditor ──► enriched call sites
-                                                          │
-                     evals (Bob or downshift evalgen) ◄───┘
-                                  │
-                                  ▼
-            downshift run  (baseline + cheaper models, judge)
-                                  │
-                                  ▼
-            downshift report  (decide + cost)  ──► Bob applies it, opens a PR
-                                  │
-                                  ▼
-            downshift diff  (GitHub Action on every PR)  ──► cost comment`;
+   |
+   v
+downshift scan ....... call sites found by static analysis
+   |
+   v
+Bob auditor .......... hidden models resolved, shared helpers split
+   |
+   v
+evals ................ Bob Eval Writer, or downshift evalgen with any model
+   |
+   v
+downshift run ........ baseline + cheaper models, graded by a judge
+   |
+   v
+downshift report ..... cheapest safe model and projected cost per call site
+   |                   -> Bob applies the decisions and opens a PR
+   v
+downshift diff ....... GitHub Action comments the cost change on every PR`;
 
 export const PIPELINE_STEPS = [
   { title: "Scan", who: "Downshift", command: "downshift scan", text: "Static analysis finds every OpenAI-compatible call site, its model and prompt." },
