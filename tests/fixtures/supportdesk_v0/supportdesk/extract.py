@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 
-from .llm import client
-from .models import model_for
+from .llm import DEFAULT_MODEL, client
+
+EXTRACTION_MODEL = DEFAULT_MODEL
 
 EXTRACTION_INSTRUCTIONS = (
     "Extract the order ID and the order date from the support ticket.\n"
@@ -18,7 +19,7 @@ EXTRACTION_INSTRUCTIONS = (
 def extract_order_info(ticket_text: str) -> dict[str, str | None]:
     """Return {"order_id": ..., "order_date": ...}; missing values are None."""
     response = client.chat.completions.create(
-        model=model_for("extract_order_info"),
+        model=EXTRACTION_MODEL,
         messages=[
             {"role": "system", "content": EXTRACTION_INSTRUCTIONS},
             {"role": "user", "content": ticket_text},

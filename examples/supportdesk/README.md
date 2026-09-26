@@ -36,9 +36,35 @@ python -m supportdesk --ticket T001
 python -m supportdesk --limit 3
 ```
 
-Environment variables: `SUPPORTDESK_LLM_BASE_URL` (default `http://localhost:11434/v1`), `SUPPORTDESK_LLM_API_KEY`, `SUPPORTDESK_MODEL`, `SUMMARY_MODEL`.
+Environment variables: `SUPPORTDESK_LLM_BASE_URL` (default `http://localhost:11434/v1`), `SUPPORTDESK_LLM_API_KEY`.
+
+## Models
+
+`models.yaml` (in this directory) controls which model each feature uses. The assignments were chosen from `downshift.report.md`:
+
+| Feature | Model |
+|---|---|
+| `classify_category` | `qwen2.5:7b` |
+| `detect_sentiment` | `qwen2.5:7b` |
+| `tag_urgency` | `qwen2.5:7b` |
+| `lang_of` | `qwen2.5:1.5b` |
+| `extract_order_info` | `qwen2.5:7b` |
+| `decide_refund` | `qwen2.5:7b` |
+| `summarize_for_agent` | `qwen2.5:7b` |
+| `draft_reply` | `qwen2.5:7b` |
+
+To use a different file, set `SUPPORTDESK_MODELS_FILE` to its absolute path before running the app.
 
 ## Data
 
 - `data/tickets.jsonl`: 40 synthetic tickets in English, Spanish, French, German, Portuguese, and Hindi, including refund edge cases (outside the window, digital goods, clearance, missing order ID).
 - `data/refund_policy.md`: the fictional policy the refund feature applies.
+
+## Scan snapshots
+
+- `downshift.scan.json`: ast scan before Phase 7 (7 call sites, 6 of 7 models resolved). The
+  audit, evals, results and report were measured against this version. A frozen copy of that
+  code lives in `tests/fixtures/supportdesk_v0/`.
+- `downshift.scan.after.json`: ast scan after model names moved to `models.yaml` (0 of 7 models
+  resolved). Static analysis can't follow a runtime config lookup. This is the gap the Bob
+  auditor is for.

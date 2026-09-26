@@ -7,7 +7,7 @@ from downshift.scanner import scan_path, scan_source
 from downshift.schema import CallSite
 
 ROOT = Path(__file__).resolve().parents[2]
-SUPPORTDESK = ROOT / "examples" / "supportdesk"
+SUPPORTDESK = ROOT / "tests" / "fixtures" / "supportdesk_v0"
 
 
 def one(src: str) -> CallSite:

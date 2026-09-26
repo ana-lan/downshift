@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from .llm import ask, client
-from .models import model_for
 
 CATEGORIES = ("billing", "shipping", "technical", "account", "refund", "other")
 
@@ -11,7 +10,7 @@ CATEGORIES = ("billing", "shipping", "technical", "account", "refund", "other")
 def classify_category(ticket_text: str) -> str:
     """Classify a ticket into one of CATEGORIES."""
     response = client.chat.completions.create(
-        model=model_for("classify_category"),
+        model="qwen2.5:7b",
         messages=[
             {"role": "system", "content": "You are a support ticket classifier."},
             {
@@ -36,7 +35,6 @@ def detect_sentiment(ticket_text: str) -> str:
         "What is the customer's overall sentiment? "
         "Reply with one word: positive, neutral, or negative.\n\n"
         f"Ticket:\n{ticket_text}",
-        feature="detect_sentiment",
         max_tokens=3,
     )
     return reply.lower().strip(".")
@@ -53,7 +51,5 @@ def tag_urgency(ticket_text: str, category: str) -> str:
         "Reply with one word.\n\n"
         f"Ticket:\n{ticket_text}"
     )
-    reply = ask(
-        prompt, feature="tag_urgency", system="You are a support operations lead.", max_tokens=3
-    )
+    reply = ask(prompt, system="You are a support operations lead.", max_tokens=3)
     return reply.lower().strip(".")

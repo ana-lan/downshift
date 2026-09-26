@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Any
 
 from .llm import client
-from .models import model_for
 
 POLICY_PATH = Path(__file__).resolve().parent.parent / "data" / "refund_policy.md"
+
+MODELS = {"refund_decision": "qwen2.5:7b"}
 
 
 def decide_refund(ticket: dict[str, Any], order_info: dict[str, str | None]) -> dict[str, Any]:
@@ -19,7 +20,7 @@ def decide_refund(ticket: dict[str, Any], order_info: dict[str, str | None]) -> 
     """
     policy = POLICY_PATH.read_text(encoding="utf-8")
     response = client.chat.completions.create(
-        model=model_for("decide_refund"),
+        model=MODELS["refund_decision"],
         messages=[
             {
                 "role": "system",
