@@ -1,17 +1,45 @@
 import { Section } from "@/components/Panel";
 import { Table } from "@/components/Table";
-import { CASE_STUDY } from "@/lib/content";
+import { CASE_STUDIES, type CaseStudy } from "@/lib/content";
 
 const td = "px-3 py-3 border-b border-line-soft whitespace-nowrap";
 const link = "text-accent hover:underline underline-offset-4";
 const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
 export default function CaseStudyPage() {
-  const cs = CASE_STUDY;
-
   return (
     <>
-      <Section eyebrow="Case study" title="OrchestrAI: one helper, five features">
+      <Section eyebrow="Case studies" title="Two real repos Downshift had never seen">
+        <p className="text-muted text-sm leading-relaxed max-w-2xl">
+          Static analysis finds where LLM calls live. Bob finds what they are and what they cost.
+          Both repos are public, permissively licensed and pinned to a commit.
+        </p>
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          {CASE_STUDIES.map((cs) => (
+            <a key={cs.slug} href={`#${cs.slug}`} className="group block border-l-2 border-accent-2 pl-4 py-1">
+              <p className="text-[11px] font-mono uppercase tracking-wider text-subtle">{cs.repo}</p>
+              <p className="mt-1 text-heading font-semibold group-hover:underline underline-offset-4">
+                {cs.headline}
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                {usd(cs.staticMonthly)} → {usd(cs.bobMonthly)} a month, once Bob fills the gaps
+              </p>
+            </a>
+          ))}
+        </div>
+      </Section>
+
+      {CASE_STUDIES.map((cs) => (
+        <Study key={cs.slug} cs={cs} />
+      ))}
+    </>
+  );
+}
+
+function Study({ cs }: { cs: CaseStudy }) {
+  return (
+    <div id={cs.slug} className="scroll-mt-20">
+      <Section eyebrow={`Case study · ${cs.name}`} title={cs.title}>
         <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
           <div className="space-y-3">
             {cs.intro.map((p, i) => (
@@ -52,7 +80,7 @@ export default function CaseStudyPage() {
         </div>
       </Section>
 
-      <Section eyebrow="Bob audit" title={`What Bob found, for ${cs.coins} Bobcoins`}>
+      <Section eyebrow={`${cs.name} · Bob audit`} title={`What Bob found, for ${cs.coins} Bobcoins`}>
         <ul className="divide-y divide-line-soft">
           {cs.bobFound.map((item, i) => (
             <li key={i} className="border-l-2 border-accent-2 pl-3 py-3 text-sm text-muted leading-relaxed">
@@ -62,7 +90,7 @@ export default function CaseStudyPage() {
         </ul>
       </Section>
 
-      <Section eyebrow="Cost projection" title="The bill static analysis cannot see">
+      <Section eyebrow={`${cs.name} · Cost projection`} title="The bill static analysis cannot see">
         <div className="grid gap-6 sm:grid-cols-2 mb-8">
           <div className="border-l border-line pl-4">
             <p className="text-[11px] font-mono uppercase tracking-wider text-subtle">Static-only view</p>
@@ -70,7 +98,7 @@ export default function CaseStudyPage() {
               {usd(cs.staticMonthly)}
               <span className="text-sm font-normal text-subtle"> / month</span>
             </p>
-            <p className="mt-1 text-xs text-subtle">1 call site, model assumed</p>
+            <p className="mt-1 text-xs text-subtle">{cs.staticNote}</p>
           </div>
           <div className="border-l-2 border-accent-2 pl-4">
             <p className="text-[11px] font-mono uppercase tracking-wider text-subtle">With the Bob audit</p>
@@ -78,7 +106,7 @@ export default function CaseStudyPage() {
               {usd(cs.bobMonthly)}
               <span className="text-sm font-normal text-subtle"> / month</span>
             </p>
-            <p className="mt-1 text-xs text-subtle">5 features, real models and prompts</p>
+            <p className="mt-1 text-xs text-subtle">{cs.bobNote}</p>
           </div>
         </div>
         <Table headers={["Feature", "Model", "Calls/day", "Monthly"]}>
@@ -102,7 +130,7 @@ export default function CaseStudyPage() {
         </pre>
       </Section>
 
-      <Section eyebrow="Findings" title="What this shows">
+      <Section eyebrow={`${cs.name} · Findings`} title="What this shows">
         <ol className="space-y-4">
           {cs.findings.map((f, i) => (
             <li key={i} className="grid grid-cols-[2rem_1fr] text-sm leading-relaxed">
@@ -113,7 +141,7 @@ export default function CaseStudyPage() {
         </ol>
       </Section>
 
-      <Section eyebrow="Limitations" title="Assumptions, stated plainly">
+      <Section eyebrow={`${cs.name} · Limitations`} title="Assumptions, stated plainly">
         <ul className="space-y-2 text-sm text-muted leading-relaxed list-disc pl-5">
           {cs.limitations.map((l, i) => (
             <li key={i}>{l}</li>
@@ -125,6 +153,6 @@ export default function CaseStudyPage() {
           </a>
         </p>
       </Section>
-    </>
+    </div>
   );
 }

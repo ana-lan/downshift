@@ -82,7 +82,8 @@ export const BOB_TASKS = [
   { task: "Apply mid tier", feature: "Agent mode, commit + PR", did: "Switched two call sites to the 3B model, opened PR #11", coins: "0.27" },
   { task: "Review a bad PR", feature: "Ask mode, context mentions", did: "Found the hard-coded model and the max_tokens cost driver", coins: "0.07" },
   { task: "Build the demo app", feature: "Agent mode, spec in context", did: "Scaffolded the Next.js app from web/SPEC.md", coins: "5.68" },
-  { task: "Audit a real repo", feature: "Custom mode + skill, context mentions", did: "OrchestrAI: 1 shared helper to 5 features, all models resolved", coins: "0.46" },
+  { task: "Audit OrchestrAI", feature: "Custom mode + skill, context mentions", did: "Real repo: 1 shared helper to 5 features, all models resolved", coins: "0.46" },
+  { task: "Audit mem0", feature: "Custom mode + skill, context mentions, steering", did: "Real repo: 14 ast call sites to the 4 features that spend money", coins: "3.32" },
 ];
 
 export const DECISION_RULE = [
@@ -172,53 +173,142 @@ scan:
   ],
 };
 
-export const CASE_STUDY = {
-  repo: "samshapley/OrchestrAI",
-  repoUrl: "https://github.com/samshapley/OrchestrAI",
-  license: "MIT",
-  commit: "866deaad457de2d9bef2c8fb227cfa52338c31e3",
-  audited: "Sep 26, 2026",
-  scope: "engineering_pipeline, the pipeline set in config.yml",
-  docUrl: `${REPO_URL}/blob/main/docs/case-study.md`,
-  coins: "0.46",
-  intro: [
-    "OrchestrAI builds software with a pipeline of LLM modules: plan, write code, debug, modify, write a README. Downshift had never seen it before.",
-    "Every module goes through one shared helper. The model comes from YAML and each prompt is loaded from a text file at runtime, so static analysis sees one call with nothing resolved.",
-  ],
-  metrics: [
-    { label: "Call sites", ast: 1, bob: 5 },
-    { label: "Models resolved", ast: 0, bob: 5 },
-    { label: "Prompts resolved", ast: 0, bob: 5 },
-    { label: "Enriched for evals", ast: 0, bob: 5 },
-  ],
-  bobFound: [
-    "Split the helper into 5 features, one per module that calls the LLM. code_planner has no function of its own and is dispatched through a generic fallback.",
-    "Resolved every model: gpt-4-0613 from config.yml for four modules, and a per-module override to gpt-3.5-turbo-16k for debugger in the pipeline YAML.",
-    "Rebuilt every prompt the way the app assembles it at runtime, including the two modules that build their own user message.",
-    "Found the volume multipliers: debugger retries up to 3 times per run, and modify_codebase loops until the user stops.",
-  ],
-  features: [
-    { name: "engineer", model: "gpt-4-0613", calls: 200, monthly: 587.7 },
-    { name: "modify_codebase", model: "gpt-4-0613", calls: 200, monthly: 575.64 },
-    { name: "code_planner", model: "gpt-4-0613", calls: 200, monthly: 566.1 },
-    { name: "create_readme", model: "gpt-4-0613", calls: 200, monthly: 560.16 },
-    { name: "debugger", model: "gpt-3.5-turbo-16k", calls: 600, monthly: 119.39 },
-  ],
-  staticMonthly: 540,
-  bobMonthly: 2408.99,
-  command: `downshift estimate docs/case-study/orchestrai/downshift.audit.json \\
+export type CaseStudy = {
+  slug: string;
+  name: string;
+  title: string;
+  headline: string;
+  repo: string;
+  repoUrl: string;
+  license: string;
+  commit: string;
+  audited: string;
+  scope: string;
+  docUrl: string;
+  coins: string;
+  intro: string[];
+  metrics: { label: string; ast: number; bob: number }[];
+  bobFound: string[];
+  features: { name: string; model: string; calls: number; monthly: number }[];
+  staticMonthly: number;
+  staticNote: string;
+  bobMonthly: number;
+  bobNote: string;
+  command: string;
+  findings: string[];
+  limitations: string[];
+};
+
+export const CASE_STUDIES: CaseStudy[] = [
+  {
+    slug: "orchestrai",
+    name: "OrchestrAI",
+    title: "OrchestrAI: one helper, five features",
+    headline: "1 call site → 5 features",
+    repo: "samshapley/OrchestrAI",
+    repoUrl: "https://github.com/samshapley/OrchestrAI",
+    license: "MIT",
+    commit: "866deaad457de2d9bef2c8fb227cfa52338c31e3",
+    audited: "Sep 26, 2026",
+    scope: "engineering_pipeline, the pipeline set in config.yml",
+    docUrl: `${REPO_URL}/blob/main/docs/case-study.md`,
+    coins: "0.46",
+    intro: [
+      "OrchestrAI builds software with a pipeline of LLM modules: plan, write code, debug, modify, write a README. Downshift had never seen it before.",
+      "Every module goes through one shared helper. The model comes from YAML and each prompt is loaded from a text file at runtime, so static analysis sees one call with nothing resolved.",
+    ],
+    metrics: [
+      { label: "Call sites", ast: 1, bob: 5 },
+      { label: "Models resolved", ast: 0, bob: 5 },
+      { label: "Prompts resolved", ast: 0, bob: 5 },
+      { label: "Enriched for evals", ast: 0, bob: 5 },
+    ],
+    bobFound: [
+      "Split the helper into 5 features, one per module that calls the LLM. code_planner has no function of its own and is dispatched through a generic fallback.",
+      "Resolved every model: gpt-4-0613 from config.yml for four modules, and a per-module override to gpt-3.5-turbo-16k for debugger in the pipeline YAML.",
+      "Rebuilt every prompt the way the app assembles it at runtime, including the two modules that build their own user message.",
+      "Found the volume multipliers: debugger retries up to 3 times per run, and modify_codebase loops until the user stops.",
+    ],
+    features: [
+      { name: "engineer", model: "gpt-4-0613", calls: 200, monthly: 587.7 },
+      { name: "modify_codebase", model: "gpt-4-0613", calls: 200, monthly: 575.64 },
+      { name: "code_planner", model: "gpt-4-0613", calls: 200, monthly: 566.1 },
+      { name: "create_readme", model: "gpt-4-0613", calls: 200, monthly: 560.16 },
+      { name: "debugger", model: "gpt-3.5-turbo-16k", calls: 600, monthly: 119.39 },
+    ],
+    staticMonthly: 540,
+    staticNote: "1 call site, model assumed",
+    bobMonthly: 2408.99,
+    bobNote: "5 features, real models and prompts",
+    command: `downshift estimate docs/case-study/orchestrai/downshift.audit.json \\
   --base docs/case-study/orchestrai/downshift.scan.json \\
   -c docs/case-study/orchestrai/downshift.yaml --completion-tokens 1500`,
-  findings: [
-    "Static analysis alone underestimates this bill about 4.5x. It sees one call where the app makes five, seven with debugger retries.",
-    "95% of projected spend is four features on gpt-4-0613, one of OpenAI's most expensive legacy models.",
-    "The author already downshifted once, by hand: debugger runs on gpt-3.5-turbo-16k. On gpt-4-0613 it would cost about $1,734 a month instead of $119. Downshift makes that call per feature, backed by evals.",
-    "A third-party pricing tracker lists gpt-4-0613 for deprecation on Oct 23, 2026. Downshift's eval step is how you would pick each replacement.",
-  ],
-  limitations: [
-    "Projection, not a bill: OpenAI list prices (checked Sep 26, 2026) x assumed volume of 200 pipeline runs a day.",
-    "Output assumed at 1,500 tokens per call because no module sets max_tokens. Input counts only the static system prompts, so it is a floor.",
-    "No evals were run on this repo (paid API calls, $0 budget), so there are no downgrade recommendations here. The SupportDesk demo shows the full loop.",
-    "Only engineering_pipeline was audited. The four other pipelines use the same helper and pattern.",
-  ],
-};
+    findings: [
+      "Static analysis alone underestimates this bill about 4.5x. It sees one call where the app makes five, seven with debugger retries.",
+      "95% of projected spend is four features on gpt-4-0613, one of OpenAI's most expensive legacy models.",
+      "The author already downshifted once, by hand: debugger runs on gpt-3.5-turbo-16k. On gpt-4-0613 it would cost about $1,734 a month instead of $119. Downshift makes that call per feature, backed by evals.",
+      "A third-party pricing tracker lists gpt-4-0613 for deprecation on Oct 23, 2026. Downshift's eval step is how you would pick each replacement.",
+    ],
+    limitations: [
+      "Projection, not a bill: OpenAI list prices (checked Sep 26, 2026) x assumed volume of 200 pipeline runs a day.",
+      "Output assumed at 1,500 tokens per call because no module sets max_tokens. Input counts only the static system prompts, so it is a floor.",
+      "No evals were run on this repo (paid API calls, $0 budget), so there are no downgrade recommendations here. The SupportDesk demo shows the full loop.",
+      "Only engineering_pipeline was audited. The four other pipelines use the same helper and pattern.",
+    ],
+  },
+  {
+    slug: "mem0",
+    name: "mem0",
+    title: "mem0: 14 call sites, 4 real features",
+    headline: "14 call sites → 4 real features",
+    repo: "mem0ai/mem0",
+    repoUrl: "https://github.com/mem0ai/mem0",
+    license: "Apache-2.0",
+    commit: "94c3fe9f238f3dbf29c9ce98643bd71eb13077cd",
+    audited: "Sep 26, 2026",
+    scope: "default setup: OpenAI provider, library code in mem0/",
+    docUrl: `${REPO_URL}/blob/main/docs/case-study-mem0.md`,
+    coins: "3.32",
+    intro: [
+      "mem0 is a widely used memory layer for AI apps: it extracts facts from conversations, stores them and retrieves them later.",
+      "It supports many LLM providers through adapter classes. Static analysis finds the adapters; the features that actually spend money are one level up. Running on it also exposed two scanner bugs, now fixed with tests.",
+    ],
+    metrics: [
+      { label: "LLM call sites", ast: 14, bob: 17 },
+      { label: "Models resolved", ast: 1, bob: 5 },
+      { label: "Prompts resolved", ast: 1, bob: 5 },
+      { label: "Product features identified", ast: 0, bob: 4 },
+    ],
+    bobFound: [
+      "Split the OpenAI adapter into the 4 features that use it: fact extraction on add(), procedural memory, image description (vision only) and search reranking.",
+      "Resolved every model and setting: gpt-5-mini by default, and a separate reranker config with its own temperature and token limit.",
+      "Rebuilt the prompts, and noted that the async add and procedural paths send the same prompts as the sync ones.",
+      "Two fix-ups by script, no Bob loop: the 13 untouched scan entries were merged back, and two long prompt constants Bob left as placeholders were copied from source.",
+    ],
+    features: [
+      { name: "fact extraction (add)", model: "gpt-5-mini", calls: 10000, monthly: 1581.98 },
+      { name: "search reranking", model: "gpt-5-mini", calls: 100000, monthly: 675 },
+      { name: "image description", model: "gpt-5-mini", calls: 500, monthly: 60.12 },
+      { name: "procedural memory", model: "gpt-5-mini", calls: 100, monthly: 12.53 },
+    ],
+    staticMonthly: 307.2,
+    staticNote: "1 OpenAI helper, model and output assumed",
+    bobMonthly: 2329.62,
+    bobNote: "4 features, real models, prompts and limits",
+    command: `downshift estimate docs/case-study/mem0/downshift.audit.json \\
+  --base docs/case-study/mem0/downshift.scan.json \\
+  -c docs/case-study/mem0/downshift.yaml`,
+    findings: [
+      "Static analysis sees plumbing, not features: 14 call sites, 13 of them provider adapters or examples. The default setup runs 4 features, and cost belongs to features.",
+      "Static-only pricing underestimates this bill about 7.6x.",
+      "The reranker calls the LLM once per candidate document. At 10 candidates, 10,000 searches become 100,000 LLM calls: $675 a month, 29% of the bill, from one for loop.",
+      "Fact extraction re-sends a 33,653-character prompt on every add(). Input alone is about $382 of that feature's $1,582, a strong candidate for prompt caching or a cheaper model.",
+    ],
+    limitations: [
+      "Projection, not a bill: OpenAI list prices (checked Sep 26, 2026) x assumed volume of 10,000 adds and 10,000 reranked searches a day.",
+      "Output is priced at max_tokens, a ceiling, so feature costs are an upper bound. Tokens are estimated from words; runtime text is not counted.",
+      "No evals were run on this repo (paid API calls, $0 budget), so there are no downgrade recommendations here.",
+      "Default setup only: the other provider adapters, the integration and the example were not audited or priced.",
+    ],
+  },
+];
