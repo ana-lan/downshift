@@ -1,0 +1,24 @@
+# Downshift config for the OrchestrAI case study (engineering_pipeline only).
+# Prices: OpenAI list prices per 1M tokens (checked Sep 26, 2026).
+# Volume is an assumption: 200 pipeline runs/day, one call per module per run,
+# except debugger (up to 3 attempts per run, worst case used).
+version: 1
+
+provider:
+  base_url: "https://api.openai.com/v1"
+
+models:
+  baseline: "gpt-4-0613"
+  candidates: ["gpt-3.5-turbo-16k"]
+
+quality_threshold: 0.95
+min_pass_rate: 0.80
+
+pricing:
+  "gpt-4-0613":        { input: 30.00, output: 60.00, tier: premium }
+  "gpt-3.5-turbo-16k": { input: 3.00,  output: 4.00,  tier: budget }
+
+volume:
+  default_per_day: 200
+  per_call_site:
+    "modules.py::debugger": 600
