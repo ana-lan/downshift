@@ -6,11 +6,20 @@ and this project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-26
+
 ### Added
 - `downshift report` shows the one-time analysis cost (eval model calls plus estimated judge
   calls, at config prices) and the payback time. New `--audit-cost USD` option for an
   assistant audit. `downshift export` adds the same numbers to `summary.json`.
+  SupportDesk: $0.65 one-time, pays back in 51 minutes.
 - Web Overview shows the analysis cost and payback time.
+- mem0 case study: 51 eval cases for 3 features and a local reranker run (no safe downgrade;
+  best candidates keep 76% of baseline quality).
+
+### Fixed
+- The judge estimate note only appears when there are judge calls.
+- Clear "No payback" sentence when nothing was downgraded; "1 minute" is singular.
 
 ## [0.1.0] - 2026-09-26
 
@@ -45,6 +54,7 @@ First public release.
 ### Added
 - Pre-release to claim the PyPI name and test Trusted Publishing.
 
-[Unreleased]: https://github.com/ana-lan/downshift/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ana-lan/downshift/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/ana-lan/downshift/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ana-lan/downshift/compare/v0.1.0.dev0...v0.1.0
 [0.1.0.dev0]: https://github.com/ana-lan/downshift/releases/tag/v0.1.0.dev0
