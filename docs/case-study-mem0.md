@@ -134,14 +134,18 @@ illustrative prices, not mem0's real models. Reranker results across all four ca
 | Model | Pass rate |
 |---|---|
 | `qwen2.5:7b` (baseline) | 17/24 (71%) |
-| `qwen2.5:3b` | 15/24 (62%) |
-| `qwen2.5:1.5b` | 12/24 (50%) |
-| `qwen2.5:0.5b` | 12/24 (50%) |
+| `qwen2.5:3b` | 13/24 (54%) |
+| `qwen2.5:1.5b` | 13/24 (54%) |
+| `qwen2.5:0.5b` | 11/24 (46%) |
 
-No safe downgrade: the 3b model keeps 88% of baseline quality, below the 95% bar. The
+No safe downgrade: the best candidates (3b and 1.5b, 13/24) keep 76% of baseline quality, below the 95% bar. The
 failures cluster in the "related but does not answer" band (scores 0.3 to 0.7); all
 models handle clear yes/no cases. The baseline itself only passes 71% of cases, below the
 80% floor, so the prompt or model needs improvement before a downgrade makes sense.
+
+Bob's built-in code review of this branch caught two mislabeled reranker cases (rr-11 and
+rr-19: documents that directly answer the query, labeled mid or low). Their bands were fixed
+to 0.8 to 1.0 and only those two cases were re-run; the table above is after the fix.
 
 Fact extraction and procedural memory have eval sets but were not run in this pass: their
 prompts are long (the extraction system prompt alone is several thousand tokens), so the

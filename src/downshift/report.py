@@ -261,7 +261,7 @@ def render_markdown(report: Report) -> str:
         if report.payback is not None and report.payback.hours is not None:
             pb_str = format_payback(report.payback)
             lines.append(f"Pays back in **{pb_str}** of projected savings.")
-        else:
+        elif report.payback is not None:
             lines.append("No payback: nothing was downgraded, so there are no projected savings.")
         lines.append("")
         blockquote = "> Priced at the same illustrative prices as the rest of the report."

@@ -43,7 +43,7 @@ No payback: nothing was downgraded, so there are no projected savings.
 |---|--- | --- | --- | ---|
 | `mem0/memory/main.py::Memory._add_to_vector_store` | **n/a** | n/a | n/a | n/a |
 | `mem0/memory/main.py::Memory._create_procedural_memory` | **n/a** | n/a | n/a | n/a |
-| `mem0/reranker/llm_reranker.py::LLMReranker.rerank` | **17/24 (71%), judge 3.8/5** | 15/24 (62%), judge 3.5/5 | 12/24 (50%), judge 3.0/5 | 12/24 (50%), judge 3.0/5 |
+| `mem0/reranker/llm_reranker.py::LLMReranker.rerank` | **17/24 (71%), judge 3.8/5** | 13/24 (54%), judge 3.2/5 | 13/24 (54%), judge 3.2/5 | 11/24 (46%), judge 2.8/5 |
 
 Judge-graded cases pass at 4/5 or higher; judge scores are averages on a 1 to 5 scale.
 
@@ -90,8 +90,8 @@ Judge-graded cases pass at 4/5 or higher; judge scores are averages on a 1 to 5 
 <summary><code>mem0/reranker/llm_reranker.py::LLMReranker.rerank</code>: keep <code>qwen2.5:7b</code></summary>
 
 - Decision: no cheaper model passed the checks
-- `qwen2.5:3b`: keeps 88% of baseline quality, needs 95%
-- `qwen2.5:1.5b`: keeps 71% of baseline quality, needs 95%
-- `qwen2.5:0.5b`: keeps 71% of baseline quality, needs 95%
+- `qwen2.5:3b`: keeps 76% of baseline quality, needs 95%
+- `qwen2.5:1.5b`: keeps 76% of baseline quality, needs 95%
+- `qwen2.5:0.5b`: keeps 65% of baseline quality, needs 95%
 
 </details>

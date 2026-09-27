@@ -304,7 +304,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       "Static-only pricing underestimates this bill about 7.6x.",
       "The reranker calls the LLM once per candidate document. At 10 candidates, 10,000 searches become 100,000 LLM calls: $675 a month, 29% of the bill, from one for loop.",
       "Fact extraction re-sends a 33,653-character prompt on every add(). Input alone is about $382 of that feature's $1,582, a strong candidate for prompt caching or a cheaper model.",
-      "51 eval cases (extraction 15, procedural memory 12, reranker 24) were written by 3 Bob subagents in parallel and run locally on Qwen 2.5 tiers. No safe downgrade was found: the best candidate (3b) keeps only 88% of reranker quality, below the 95% bar, with failures clustering in the ambiguous mid-band. The reranker baseline itself passes 71% of cases, below the 80% floor, so the prompt needs improvement before a downgrade can be made.",
+      "51 eval cases (extraction 15, procedural memory 12, reranker 24) were written by 3 Bob subagents in parallel and run locally on Qwen 2.5 tiers; Bob's code review caught 2 mislabeled cases, fixed before the final run. No safe downgrade was found: the best candidates (3b, 1.5b) keep only 76% of reranker quality, below the 95% bar, with failures clustering in the ambiguous mid-band. The reranker baseline itself passes 71% of cases, below the 80% floor, so the prompt needs improvement before a downgrade can be made.",
     ],
     limitations: [
       "Projection, not a bill: OpenAI list prices (checked Sep 26, 2026) x assumed volume of 10,000 adds and 10,000 reranked searches a day.",
