@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: ana-lan/downshift@v0.1.0
+      - uses: ana-lan/downshift@v0.1.1
         with:
           path: .              # directory to scan
           fail-above: "500"    # optional: fail if the monthly increase is above $500
