@@ -150,7 +150,7 @@ scan:
 
 ## Using it with IBM Bob
 
-The `.bob/` folder ships two custom modes (Downshift Auditor, Downshift Eval Writer) and their skills. The auditor can only edit the audit file, never your code. Setup and prompts: [`docs/bob.md`](https://github.com/ana-lan/downshift/blob/main/docs/bob.md). Every Bob task in this project has a screenshot in [`bob_sessions/`](https://github.com/ana-lan/downshift/tree/main/bob_sessions). In total, 11 tasks used 22.12 of 40 Bobcoins.
+The `.bob/` folder ships two custom modes (Downshift Auditor, Downshift Eval Writer) and their skills. The auditor can only edit the audit file, never your code. Setup and prompts: [`docs/bob.md`](https://github.com/ana-lan/downshift/blob/main/docs/bob.md). Every Bob task in this project has a screenshot in [`bob_sessions/`](https://github.com/ana-lan/downshift/tree/main/bob_sessions). In total, 17 tasks used 34.20 of 40 Bobcoins.
 
 ## Limitations
 
@@ -170,7 +170,7 @@ git clone https://github.com/ana-lan/downshift && cd downshift
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ruff format . && ruff check . && mypy src
-python -m pytest            # 577 tests, no network, no models (97% coverage)
+python -m pytest            # 612 tests, no network, no models
 python -m pytest -m integration   # needs a local Ollama
 ```
 
