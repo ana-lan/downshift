@@ -1,0 +1,38 @@
+# Local run of mem0's reranker evals on Ollama. Same volumes as downshift.yaml;
+# models and illustrative prices from the SupportDesk config. Not mem0's real models.
+version: 1
+provider:
+  base_url: http://localhost:11434/v1
+models:
+  baseline: qwen2.5:7b
+  candidates:
+  - qwen2.5:3b
+  - qwen2.5:1.5b
+  - qwen2.5:0.5b
+quality_threshold: 0.95
+min_pass_rate: 0.8
+pricing:
+  qwen2.5:7b:
+    input: 2.5
+    output: 10.0
+    tier: premium
+  qwen2.5:3b:
+    input: 0.4
+    output: 1.6
+    tier: standard
+  qwen2.5:1.5b:
+    input: 0.15
+    output: 0.6
+    tier: budget
+  qwen2.5:0.5b:
+    input: 0.1
+    output: 0.4
+    tier: nano
+volume:
+  default_per_day: 0
+  per_call_site:
+    mem0/llms/openai.py::OpenAILLM.generate_response: 20000
+    mem0/memory/main.py::Memory._add_to_vector_store: 10000
+    mem0/reranker/llm_reranker.py::LLMReranker.rerank: 100000
+    mem0/memory/main.py::Memory._create_procedural_memory: 100
+    mem0/memory/utils.py::get_image_description: 500
