@@ -71,5 +71,10 @@
       "tier": "nano"
     }
   ],
-  "disclaimer": "Dollar figures are projections: measured token counts x illustrative per-model prices x an assumed call volume, all set in downshift.yaml. They are not a real bill."
+  "disclaimer": "Dollar figures are projections: measured token counts x illustrative per-model prices x an assumed call volume, all set in downshift.yaml. They are not a real bill.",
+  "analysis_cost_total": 0.6476,
+  "analysis_model_cost": 0.1518,
+  "analysis_judge_cost": 0.4957,
+  "analysis_calls": 900,
+  "payback_hours": 0.84
 }

@@ -566,3 +566,146 @@ def test_build_report_real_supportdesk() -> None:
     md = render_markdown(report)
     assert md.endswith("\n")
     assert "# Downshift report" in md
+
+
+# ---------------------------------------------------------------------------
+# render_markdown: What this analysis cost section
+# ---------------------------------------------------------------------------
+
+
+def test_analysis_cost_section_present() -> None:
+    """Section appears when report.analysis is set."""
+    from downshift.payback import AnalysisCost, Payback
+
+    d = decide([mk("big", 22), mk("mid", 22), mk("small", 20)])
+    ac = AnalysisCost(
+        model_calls=10,
+        model_cost=0.05,
+        judge_calls=5,
+        judge_cost=0.02,
+        judge_model="mid",
+        judge_priced_as="mid",
+        audit_cost=0.0,
+    )
+    pb = Payback(hours=8.0)
+    report = _make_report([d])
+    report = Report(
+        sites=report.sites,
+        decisions=report.decisions,
+        costs=report.costs,
+        missing_evals=report.missing_evals,
+        baseline=report.baseline,
+        candidates=report.candidates,
+        threshold=report.threshold,
+        min_pass_rate=report.min_pass_rate,
+        analysis=ac,
+        payback=pb,
+    )
+    md = render_markdown(report)
+    assert "## What this analysis cost" in md
+    assert "Eval model calls (10)" in md
+    assert "Judge calls, estimated (5)" in md
+    assert "Pays back in" in md
+
+
+def test_analysis_cost_section_absent_when_no_analysis() -> None:
+    """Section is absent when report.analysis is None."""
+    d = decide([mk("big", 22), mk("mid", 22), mk("small", 20)])
+    report = _make_report([d])
+    # _make_report does not set analysis; it defaults to None
+    md = render_markdown(report)
+    assert "## What this analysis cost" not in md
+
+
+def test_judge_row_absent_when_no_judge_calls() -> None:
+    """Judge row is omitted when judge_calls == 0."""
+    from downshift.payback import AnalysisCost, Payback
+
+    d = decide([mk("big", 22), mk("mid", 22), mk("small", 20)])
+    ac = AnalysisCost(
+        model_calls=5,
+        model_cost=0.01,
+        judge_calls=0,
+        judge_cost=0.0,
+        judge_model=None,
+        judge_priced_as=None,
+    )
+    report = _make_report([d])
+    report = Report(
+        sites=report.sites,
+        decisions=report.decisions,
+        costs=report.costs,
+        missing_evals=report.missing_evals,
+        baseline=report.baseline,
+        candidates=report.candidates,
+        threshold=report.threshold,
+        min_pass_rate=report.min_pass_rate,
+        analysis=ac,
+        payback=Payback(hours=None),
+    )
+    md = render_markdown(report)
+    assert "## What this analysis cost" in md
+    assert "Judge calls" not in md
+
+
+def test_audit_row_absent_when_audit_cost_zero() -> None:
+    """Assistant audit row is omitted when audit_cost == 0."""
+    from downshift.payback import AnalysisCost, Payback
+
+    d = decide([mk("big", 22), mk("mid", 22), mk("small", 20)])
+    ac = AnalysisCost(
+        model_calls=5,
+        model_cost=0.01,
+        judge_calls=0,
+        judge_cost=0.0,
+        judge_model=None,
+        judge_priced_as=None,
+        audit_cost=0.0,
+    )
+    report = _make_report([d])
+    report = Report(
+        sites=report.sites,
+        decisions=report.decisions,
+        costs=report.costs,
+        missing_evals=report.missing_evals,
+        baseline=report.baseline,
+        candidates=report.candidates,
+        threshold=report.threshold,
+        min_pass_rate=report.min_pass_rate,
+        analysis=ac,
+        payback=Payback(hours=None),
+    )
+    md = render_markdown(report)
+    assert "Assistant audit" not in md
+
+
+def test_audit_row_present_when_audit_cost_nonzero() -> None:
+    """Assistant audit row appears when audit_cost > 0."""
+    from downshift.payback import AnalysisCost, Payback
+
+    d = decide([mk("big", 22), mk("mid", 22), mk("small", 20)])
+    ac = AnalysisCost(
+        model_calls=5,
+        model_cost=0.01,
+        judge_calls=0,
+        judge_cost=0.0,
+        judge_model=None,
+        judge_priced_as=None,
+        audit_cost=1.50,
+    )
+    report = _make_report([d])
+    report = Report(
+        sites=report.sites,
+        decisions=report.decisions,
+        costs=report.costs,
+        missing_evals=report.missing_evals,
+        baseline=report.baseline,
+        candidates=report.candidates,
+        threshold=report.threshold,
+        min_pass_rate=report.min_pass_rate,
+        analysis=ac,
+        payback=Payback(hours=2.0),
+    )
+    md = render_markdown(report)
+    assert "Assistant audit" in md
+    assert "$1.50" in md
