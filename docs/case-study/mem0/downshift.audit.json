@@ -1880,7 +1880,7 @@
       "purpose": "Extract and store new facts from a conversation turn into the mem0 vector store using additive (ADD-only) extraction with memory linking.",
       "output_contract": "JSON object with key 'memory' whose value is a list of objects; each object has 'id' (sequential string), 'text' (string, 15\u2013100 words), and optionally 'linked_memory_ids' (array of UUID strings). No UPDATE or DELETE operations. Parsed via json.loads(...).get('memory', []).",
       "difficulty": "medium",
-      "grading": "json_fields",
+      "grading": "judge",
       "found_by": "bob"
     },
     {
@@ -2016,7 +2016,7 @@
       "purpose": "Score the relevance of a single retrieved memory document against a search query so that mem0 can rerank search results before returning them to the caller.",
       "output_contract": "A single decimal number between 0.0 and 1.0 with no surrounding text. Parsed by regex (decimal preferred, integer fallback) and clamped to [0.0, 1.0]. Any non-parseable response falls back to 0.5.",
       "difficulty": "easy",
-      "grading": "exact",
+      "grading": "judge",
       "found_by": "bob"
     }
   ]
