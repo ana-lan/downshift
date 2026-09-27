@@ -11,7 +11,7 @@
 <a href="https://github.com/ana-lan/downshift/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
 </p>
 
-<p><strong>Live demo:</strong> <a href="https://downshift-llm.vercel.app/">downshift-llm.vercel.app</a></p>
+<p><strong>Live demo:</strong> <a href="https://downshift-llm.vercel.app/">downshift-llm.vercel.app</a> | <strong>Demo video:</strong> <a href="https://youtu.be/GVX8PUrgpB4">2-minute walkthrough</a></p>
 
 </div>
 
