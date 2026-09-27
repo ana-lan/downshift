@@ -1880,7 +1880,7 @@
       "purpose": "Extract and store new facts from a conversation turn into the mem0 vector store using additive (ADD-only) extraction with memory linking.",
       "output_contract": "JSON object with key 'memory' whose value is a list of objects; each object has 'id' (sequential string), 'text' (string, 15\u2013100 words), and optionally 'linked_memory_ids' (array of UUID strings). No UPDATE or DELETE operations. Parsed via json.loads(...).get('memory', []).",
       "difficulty": "medium",
-      "grading": "json_fields",
+      "grading": "judge",
       "found_by": "bob"
     },
     {
@@ -1905,7 +1905,7 @@
           "resolved": true
         },
         {
-          "role": "{role}",
+          "role": "assistant",
           "content": "{content}",
           "resolved": true
         },
@@ -1926,7 +1926,8 @@
         "Bob: first message uses the PROCEDURAL_MEMORY_SYSTEM_PROMPT constant from mem0/configs/prompts.py unless the caller passes a custom 'prompt' argument, in which case that string replaces it. Placeholder {procedural_memory_system_prompt} represents the full constant value.",
         "Bob: the middle messages are the raw conversation messages passed in by the caller (*messages splice), represented here as a single template row with {role}/{content} placeholders.",
         "Bob: the async twin of this call (asyncio.to_thread wrapper at main.py line 3745) sends identical messages; no separate entry added for it.",
-        "Filled after the audit by a script: Bob wrote a placeholder for the module constant PROCEDURAL_MEMORY_SYSTEM_PROMPT; its text was copied from mem0/configs/prompts.py (skill step 5)."
+        "Filled after the audit by a script: Bob wrote a placeholder for the module constant PROCEDURAL_MEMORY_SYSTEM_PROMPT; its text was copied from mem0/configs/prompts.py (skill step 5).",
+        "Eval prep: the agent-history message role was the template {role}; set to 'assistant' (agent output) so eval cases only fill {content}."
       ],
       "purpose": "Summarise an agent's full execution history into a structured procedural memory record that captures every action, result, and key finding verbatim.",
       "output_contract": "Free-text markdown summary following the PROCEDURAL_MEMORY_SYSTEM_PROMPT template: starts with Task Objective and Progress Status, followed by numbered agent-action steps each containing Action, Action Result (verbatim), Key Findings, Navigation History, Errors, and Current Context. Must be non-empty; ValueError raised otherwise.",
@@ -2016,7 +2017,7 @@
       "purpose": "Score the relevance of a single retrieved memory document against a search query so that mem0 can rerank search results before returning them to the caller.",
       "output_contract": "A single decimal number between 0.0 and 1.0 with no surrounding text. Parsed by regex (decimal preferred, integer fallback) and clamped to [0.0, 1.0]. Any non-parseable response falls back to 0.5.",
       "difficulty": "easy",
-      "grading": "exact",
+      "grading": "judge",
       "found_by": "bob"
     }
   ]
