@@ -25,7 +25,7 @@ Totals exclude 2 call sites with unknown cost (see Needs attention).
 | Judge calls, estimated (96) | $0.28 |
 | **Total** | **$0.29** |
 
-Pays back in **no payback (no projected savings)** of projected savings.
+No payback: nothing was downgraded, so there are no projected savings.
 
 > Priced at the same illustrative prices as the rest of the report. Judge tokens are not recorded, so each judge call is estimated as (case prompt + output + 150) tokens in and 200 out, priced as `qwen2.5:7b`. Retries and warm-up calls are not counted. Local Ollama runs cost $0 in practice.
 

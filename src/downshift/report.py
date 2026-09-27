@@ -258,8 +258,11 @@ def render_markdown(report: Report) -> str:
             lines.append(f"| Assistant audit | {_fmt_money(ac.audit_cost)} |")
         lines.append(f"| **Total** | **{_fmt_money(ac.total)}** |")
         lines.append("")
-        pb_str = format_payback(report.payback) if report.payback is not None else "n/a"
-        lines.append(f"Pays back in **{pb_str}** of projected savings.")
+        if report.payback is not None and report.payback.hours is not None:
+            pb_str = format_payback(report.payback)
+            lines.append(f"Pays back in **{pb_str}** of projected savings.")
+        else:
+            lines.append("No payback: nothing was downgraded, so there are no projected savings.")
         lines.append("")
         blockquote = "> Priced at the same illustrative prices as the rest of the report."
         if ac.judge_calls > 0:
