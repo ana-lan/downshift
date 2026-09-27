@@ -112,10 +112,45 @@ Full output: [estimate.md](case-study/mem0/estimate.md).
 - **Output is priced at `max_tokens`**, a ceiling, so feature costs are an upper bound.
 - **Tokens are estimated from words**; real token counts for long prompts are usually
   higher. Runtime text (conversation, memories, documents) is not counted.
-- **No evals were run** (paid API calls, $0 budget), so no downgrade recommendations.
+- Evals were run locally (see below); no downgrade was safe for the reranker.
 - **Default setup only.** The other provider adapters, the integration and the example
   were copied from the scan unchanged and are not priced (0 calls a day, or no configured
   price for the example's `grok-3-beta`).
+
+## Evals and a local run
+
+Three Bob subagents wrote eval sets in parallel (task B12): 15 cases for fact extraction,
+12 for procedural memory, and 24 for the reranker, for a total of 51 cases. Image
+description has no evals: it needs a vision model and real image URLs.
+
+Grading is judge-based for the reranker (it returns a decimal score, so exact match is
+meaningless; the rubric checks the score band) and for extraction (free-text memories).
+For procedural memory the message role was a template placeholder; it was set to
+`assistant` before running.
+
+The run used `downshift.local.yaml` on Ollama with Qwen 2.5 tiers and SupportDesk's
+illustrative prices, not mem0's real models. Reranker results across all four candidates:
+
+| Model | Pass rate |
+|---|---|
+| `qwen2.5:7b` (baseline) | 17/24 (71%) |
+| `qwen2.5:3b` | 15/24 (62%) |
+| `qwen2.5:1.5b` | 12/24 (50%) |
+| `qwen2.5:0.5b` | 12/24 (50%) |
+
+No safe downgrade: the 3b model keeps 88% of baseline quality, below the 95% bar. The
+failures cluster in the "related but does not answer" band (scores 0.3 to 0.7); all
+models handle clear yes/no cases. The baseline itself only passes 71% of cases, below the
+80% floor, so the prompt or model needs improvement before a downgrade makes sense.
+
+Fact extraction and procedural memory have eval sets but were not run in this pass: their
+prompts are long (the extraction system prompt alone is several thousand tokens), so the
+local run covered only the reranker. They can be run the same way with `--site`.
+
+The total analysis cost was $0.29 one-time at illustrative prices (96 eval calls at $0.02
+plus an estimated 96 judge calls at $0.28). Local Ollama runs cost $0 in practice.
+
+Full results: [eval-report.md](case-study/mem0/eval-report.md).
 
 ## Reproduce
 
