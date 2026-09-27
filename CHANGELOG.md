@@ -6,6 +6,12 @@ and this project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `downshift report` shows the one-time analysis cost (eval model calls plus estimated judge
+  calls, at config prices) and the payback time. New `--audit-cost USD` option for an
+  assistant audit. `downshift export` adds the same numbers to `summary.json`.
+- Web Overview shows the analysis cost and payback time.
+
 ## [0.1.0] - 2026-09-26
 
 First public release.

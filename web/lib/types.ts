@@ -6,6 +6,11 @@ export interface Pricing {
   tier: string | null;
 }
 export interface Summary {
+  analysis_cost_total?: number | null;
+  analysis_model_cost?: number | null;
+  analysis_judge_cost?: number | null;
+  analysis_calls?: number | null;
+  payback_hours?: number | null;
   project: string;
   tool_version: string;
   baseline: string;

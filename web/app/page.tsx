@@ -7,7 +7,7 @@ import { LinkButton } from "@/components/Button";
 import { DecisionBadge } from "@/components/Badge";
 import { summary, callsites, audit, totalEvalCases } from "@/lib/data";
 import { auditRows, sortBySavings, chosenStats, baselineStats } from "@/lib/select";
-import { formatUsd, formatPct, formatPts, siteName, siteFile } from "@/lib/format";
+import { formatUsd, formatPct, formatPts, formatPayback, siteName, siteFile } from "@/lib/format";
 import { REPO_URL, RESULT_NOTES, AUDIT_INTRO, CI_DEMO } from "@/lib/content";
 
 const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
@@ -57,6 +57,15 @@ function CostBars() {
           </span>
         </span>
       </div>
+      {summary.analysis_cost_total != null && summary.payback_hours != null && (
+        <p className="mt-3 text-xs text-subtle">
+          One-time analysis cost{" "}
+          <span className="font-mono tabular-nums text-muted">
+            {formatUsd(summary.analysis_cost_total)}
+          </span>{" "}
+          &middot; pays back in {formatPayback(summary.payback_hours ?? null)}
+        </p>
+      )}
     </div>
   );
 }

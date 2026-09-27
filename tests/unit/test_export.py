@@ -210,3 +210,19 @@ def test_write_export(data: dict[str, Any], tmp_path: Path) -> None:
     assert (out / REPORT_FILE).read_text(encoding="utf-8") == md
     committed = (SD / "downshift.report.md").read_text(encoding="utf-8")
     assert md == committed
+
+
+def test_summary_analysis_keys_present(data: dict[str, Any]) -> None:
+    """The five new analysis/payback keys must be present in the summary payload."""
+    s = data["payloads"][SUMMARY_FILE]
+    for key in (
+        "analysis_cost_total",
+        "analysis_model_cost",
+        "analysis_judge_cost",
+        "analysis_calls",
+        "payback_hours",
+    ):
+        assert key in s, f"missing key: {key}"
+    # The supportdesk example has results, so values should be non-None
+    assert s["analysis_cost_total"] is not None
+    assert s["analysis_calls"] is not None

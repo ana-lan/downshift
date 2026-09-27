@@ -60,3 +60,13 @@ export function shortModel(model: string): string {
   const i = model.lastIndexOf(":");
   return i >= 0 ? model.slice(i + 1) : model;
 }
+
+export function formatPayback(hours: number | null): string {
+  if (hours === null) return "n/a";
+  if (hours < 1) {
+    const m = Math.max(1, Math.ceil(hours * 60));
+    return m === 1 ? "1 minute" : `${m} minutes`;
+  }
+  if (hours < 48) return `${hours.toFixed(1)} hours`;
+  return `${Math.ceil(hours / 24)} days`;
+}

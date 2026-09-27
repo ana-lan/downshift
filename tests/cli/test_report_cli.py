@@ -113,3 +113,19 @@ def test_invalid_threshold_above_one_exits_2() -> None:
 def test_invalid_min_pass_rate_above_one_exits_2() -> None:
     result = invoke("--min-pass-rate", "1.1")
     assert result.exit_code == 2
+
+
+# ---------------------------------------------------------------------------
+# --audit-cost
+# ---------------------------------------------------------------------------
+
+
+def test_audit_cost_flag_accepted() -> None:
+    result = invoke("--audit-cost", "0.5")
+    assert result.exit_code == 0, result.output
+    assert "## What this analysis cost" in result.output
+
+
+def test_audit_cost_negative_rejected() -> None:
+    result = invoke("--audit-cost", "-0.01")
+    assert result.exit_code == 2

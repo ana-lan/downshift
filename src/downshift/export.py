@@ -150,6 +150,21 @@ def summary_payload(report: Report, config: Config, rows: Rows, *, project: str)
         },
         "pricing": pricing,
         "disclaimer": DISCLAIMER,
+        "analysis_cost_total": (
+            _round(report.analysis.total, 4) if report.analysis is not None else None
+        ),
+        "analysis_model_cost": (
+            _round(report.analysis.model_cost, 4) if report.analysis is not None else None
+        ),
+        "analysis_judge_cost": (
+            _round(report.analysis.judge_cost, 4) if report.analysis is not None else None
+        ),
+        "analysis_calls": (
+            (report.analysis.model_calls + report.analysis.judge_calls)
+            if report.analysis is not None
+            else None
+        ),
+        "payback_hours": (_round(report.payback.hours, 2) if report.payback is not None else None),
     }
 
 

@@ -22,6 +22,9 @@ from downshift.decide import (
     load_site_stats,
 )
 from downshift.evals import EVAL_SUFFIX, EvalError, load_eval_set, slug_for
+from downshift.payback import AnalysisCost, Payback, format_payback
+from downshift.payback import analysis_cost as _analysis_cost
+from downshift.payback import payback as _payback
 from downshift.schema import CallSite, ScanResult
 
 NEAR_MISS_MARGIN = 0.05
@@ -43,6 +46,8 @@ class Report:
     candidates: tuple[str, ...]
     threshold: float
     min_pass_rate: float
+    analysis: AnalysisCost | None = None
+    payback: Payback | None = None
 
     @property
     def downgraded(self) -> tuple[Decision, ...]:
@@ -89,6 +94,7 @@ def build_report(
     *,
     threshold: float | None = None,
     min_pass_rate: float | None = None,
+    audit_cost: float = 0.0,
 ) -> Report:
     """Assemble a Report from disk.
 
@@ -131,6 +137,8 @@ def build_report(
         decisions.append(decision)
 
     costs = cost_summary(decisions, config.pricing, config.volume)
+    ac = _analysis_cost(decided_sites, results_dir, config, audit_cost=audit_cost)
+    pb = _payback(ac.total, costs.savings)
 
     return Report(
         sites=tuple(decided_sites),
@@ -141,6 +149,8 @@ def build_report(
         candidates=config.models.candidates,
         threshold=eff_threshold,
         min_pass_rate=eff_min_pass_rate,
+        analysis=ac,
+        payback=pb,
     )
 
 
@@ -230,6 +240,40 @@ def render_markdown(report: Report) -> str:
         lines.append(
             f"Totals exclude {n_unknown} call sites with unknown cost (see Needs attention)."
         )
+        lines.append("")
+
+    # ------------------------------------------------------------------ analysis cost
+    if report.analysis is not None:
+        ac = report.analysis
+        lines.append("## What this analysis cost")
+        lines.append("")
+        lines.append("| | One-time cost |")
+        lines.append("|---|---:|")
+        lines.append(f"| Eval model calls ({ac.model_calls}) | {_fmt_money(ac.model_cost)} |")
+        if ac.judge_calls > 0:
+            lines.append(
+                f"| Judge calls, estimated ({ac.judge_calls}) | {_fmt_money(ac.judge_cost)} |"
+            )
+        if ac.audit_cost > 0:
+            lines.append(f"| Assistant audit | {_fmt_money(ac.audit_cost)} |")
+        lines.append(f"| **Total** | **{_fmt_money(ac.total)}** |")
+        lines.append("")
+        pb_str = format_payback(report.payback) if report.payback is not None else "n/a"
+        lines.append(f"Pays back in **{pb_str}** of projected savings.")
+        lines.append("")
+        blockquote = "> Priced at the same illustrative prices as the rest of the report."
+        if ac.judge_calls > 0:
+            blockquote += (
+                " Judge tokens are not recorded, so each judge call is estimated as"
+                " (case prompt + output + 150) tokens in and 200 out"
+            )
+            if ac.judge_priced_as is not None:
+                blockquote += f", priced as `{ac.judge_priced_as}`"
+            blockquote += "."
+        blockquote += (
+            " Retries and warm-up calls are not counted. Local Ollama runs cost $0 in practice."
+        )
+        lines.append(blockquote)
         lines.append("")
 
     # ------------------------------------------------------------------ decisions table

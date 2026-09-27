@@ -690,6 +690,12 @@ def report(
         help="Minimum pass rate override [0,1]. Default: from config.",
     ),
     out: Path | None = typer.Option(None, "--out", help="Write Markdown to this file."),
+    audit_cost: float = typer.Option(
+        0.0,
+        "--audit-cost",
+        min=0.0,
+        help="One-time cost of an assistant audit, in USD, added to the analysis cost.",
+    ),
 ) -> None:
     """Render the cost and quality report."""
     if threshold is not None and threshold <= 0:
@@ -713,6 +719,7 @@ def report(
             results_dir,
             threshold=threshold,
             min_pass_rate=min_pass_rate,
+            audit_cost=audit_cost,
         )
     except ReportError as exc:
         _fail(str(exc))

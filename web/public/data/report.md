@@ -15,6 +15,18 @@ Downgraded **3 of 8** call sites.
 
 Rule: a cheaper model must keep at least 95% of the baseline pass rate and pass at least 80% of cases on its own. Decisions use pass rate, not mean score.
 
+## What this analysis cost
+
+| | One-time cost |
+|---|---:|
+| Eval model calls (724) | $0.15 |
+| Judge calls, estimated (176) | $0.50 |
+| **Total** | **$0.65** |
+
+Pays back in **51 minutes** of projected savings.
+
+> Priced at the same illustrative prices as the rest of the report. Judge tokens are not recorded, so each judge call is estimated as (case prompt + output + 150) tokens in and 200 out, priced as `qwen2.5:7b`. Retries and warm-up calls are not counted. Local Ollama runs cost $0 in practice.
+
 ## Decisions
 
 | Call site | Grading | Decision | Model | Pass rate | Before / month | After / month |
