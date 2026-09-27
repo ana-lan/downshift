@@ -261,15 +261,17 @@ def render_markdown(report: Report) -> str:
         pb_str = format_payback(report.payback) if report.payback is not None else "n/a"
         lines.append(f"Pays back in **{pb_str}** of projected savings.")
         lines.append("")
-        blockquote = (
-            "> Priced at the same illustrative prices as the rest of the report."
-            " Judge tokens are not recorded, so each judge call is estimated as"
-            " (case prompt + output + 150) tokens in and 200 out"
-        )
-        if ac.judge_calls > 0 and ac.judge_priced_as is not None:
-            blockquote += f", priced as `{ac.judge_priced_as}`"
+        blockquote = "> Priced at the same illustrative prices as the rest of the report."
+        if ac.judge_calls > 0:
+            blockquote += (
+                " Judge tokens are not recorded, so each judge call is estimated as"
+                " (case prompt + output + 150) tokens in and 200 out"
+            )
+            if ac.judge_priced_as is not None:
+                blockquote += f", priced as `{ac.judge_priced_as}`"
+            blockquote += "."
         blockquote += (
-            ". Retries and warm-up calls are not counted. Local Ollama runs cost $0 in practice."
+            " Retries and warm-up calls are not counted. Local Ollama runs cost $0 in practice."
         )
         lines.append(blockquote)
         lines.append("")

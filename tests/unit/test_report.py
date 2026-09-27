@@ -646,6 +646,7 @@ def test_judge_row_absent_when_no_judge_calls() -> None:
     md = render_markdown(report)
     assert "## What this analysis cost" in md
     assert "Judge calls" not in md
+    assert "Judge tokens are not recorded" not in md
 
 
 def test_audit_row_absent_when_audit_cost_zero() -> None:

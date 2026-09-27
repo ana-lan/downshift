@@ -57,7 +57,7 @@ function CostBars() {
           </span>
         </span>
       </div>
-      {summary.analysis_cost_total != null && (
+      {summary.analysis_cost_total != null && summary.payback_hours != null && (
         <p className="mt-3 text-xs text-subtle">
           One-time analysis cost{" "}
           <span className="font-mono tabular-nums text-muted">

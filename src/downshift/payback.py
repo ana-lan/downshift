@@ -165,7 +165,7 @@ def format_payback(p: Payback) -> str:
         return "no payback (no projected savings)"
     if p.hours < 1.0:
         minutes = max(1, math.ceil(p.hours * 60))
-        return f"{minutes} minutes"
+        return f"{minutes} minute" if minutes == 1 else f"{minutes} minutes"
     if p.hours < 48.0:
         return f"{p.hours:.1f} hours"
     days = math.ceil(p.hours / 24)

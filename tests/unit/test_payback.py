@@ -117,7 +117,7 @@ def test_format_payback_minutes() -> None:
 def test_format_payback_minimum_one_minute() -> None:
     # Very short but > 0 hours → at least 1 minute
     result = format_payback(Payback(hours=0.001))
-    assert result == "1 minutes"
+    assert result == "1 minute"
 
 
 def test_format_payback_hours_one_decimal() -> None:
