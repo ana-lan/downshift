@@ -81,7 +81,11 @@ SupportDesk (`examples/supportdesk`) is a synthetic support ticket app with 8 LL
 | Models resolved | 6 | 8 |
 | Prompts resolved | 5 | 8 |
 
-After evals on local Qwen 2.5 models (7b baseline; 3b, 1.5b, 0.5b candidates), **3 of 8 call sites can downgrade**. Projected monthly cost goes from **$3,137.26 to $2,572.61, saving $564.65 (18%)**, while the mean pass rate moves from 68.3% to 68.9%. Full report: [`examples/supportdesk/downshift.report.md`](https://github.com/ana-lan/downshift/blob/main/examples/supportdesk/downshift.report.md). Bob then applied the decisions and opened the PR itself.
+After 182 eval cases across the 8 call sites on local Qwen 2.5 models (7b baseline; 3b, 1.5b, 0.5b candidates), **3 of 8 call sites can downgrade**. Projected monthly cost goes from **$3,137.26 to $2,572.61, saving $564.65 (18%)**, while the mean pass rate moves from 68.3% to 68.9%. Full report: [`examples/supportdesk/downshift.report.md`](https://github.com/ana-lan/downshift/blob/main/examples/supportdesk/downshift.report.md). Bob then applied the decisions and opened the PR itself.
+
+### Judge validation
+
+Two call sites write free text (`draft_reply`, `summarize_for_agent`), so an LLM judge grades them. When the 7b baseline graded its own outputs, `draft_reply` passed 22/22 (100%) and `summarize_for_agent` passed 20/22 (91%). Re-grading the same saved outputs with `openai/gpt-oss-120b` via `downshift rescore` dropped them to 3/22 (14%) and 13/22 (59%). All reported results use the independent judge. Both runs are in the [raw results](https://github.com/ana-lan/downshift/blob/main/examples/supportdesk/results/supportdesk.agent_assist__draft_reply/qwen2.5-7b.jsonl) (rows 1-22 self-graded, 23-44 rescored).
 
 ## Case studies on real repos
 
